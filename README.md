@@ -8,7 +8,7 @@
 [![verify](https://github.com/Navesz/bookkeep/actions/workflows/verify.yml/badge.svg)](https://github.com/Navesz/bookkeep/actions/workflows/verify.yml)
 [![License](https://img.shields.io/github/license/Navesz/bookkeep)](LICENSE)
 
-[House rules](AGENTS.md) · [Contributing](CONTRIBUTING.md)
+[About page](https://navesz.github.io/bookkeep/) · [House rules](AGENTS.md) · [Contributing](CONTRIBUTING.md)
 
 ```sh
 npm ci
@@ -49,19 +49,26 @@ again, and asserts that exactly one open loan exists whatever the caller tried.
 
 ## What is here today
 
-The data layer and the gate, and the screens are landing on top of them.
+Nine routes, and a librarian can work a whole day in them: the catalogue with
+search, a book with its copies, the desk that stays open all day, members, one
+member's loans and history, what is overdue, and the three forms that add a
+book, a copy and a member.
+
 `lib/db/` — schema, catalogue, members, loans, seed — and the server actions in
 `app/actions.ts` are covered by 69 test cases that run against a real SQLite
 file in a temporary directory, because a mock of the database would be a mock of
 the exact thing under test.
 
-**Not every screen exists yet.** The sidebar offers Catalogue, Desk, Members and
-Overdue; a section whose route has not been written 404s. `npm run build` prints
-the routes that actually answer, which is the only version of that list that
-cannot go stale. Said out loud rather than left to be discovered, because the
-repository this one replaces had a 12 KB README, a `package.json` with eight
-scripts pointing at files that are not in the tree, and no `app/` directory at
-all.
+**Reading works without JavaScript.** Search is a plain GET with the query in
+the URL, and the pages are server components that call the database in the same
+process — which is the whole reason to choose SQLite. JavaScript makes it
+quicker; it is not what makes it work.
+
+`npm run build` prints the routes that actually answer, which is the only
+version of that list that cannot go stale. Worth running rather than trusting
+this paragraph, because the repository this one replaces had a 12 KB README, a
+`package.json` with eight scripts pointing at files that are not in the tree,
+and no `app/` directory at all.
 
 ## Zero dependencies under the UI
 
@@ -78,7 +85,10 @@ call into it lives behind `lib/db/connection.ts`, so trading it for
 
 **It cannot be published to GitHub Pages.** It answers requests and writes to a
 file; a static host gives you neither a process nor a writable disk. One machine
-with Node on it is the deployment.
+with Node on it is the deployment. There *is* a page at
+[navesz.github.io/bookkeep](https://navesz.github.io/bookkeep/), and it is a
+page **about** this — not a copy you can use. The distinction is the same one
+this paragraph is making, so the page makes it too.
 
 **There is no authentication.** Anyone who can reach the port is the librarian.
 Run it where you control who can.

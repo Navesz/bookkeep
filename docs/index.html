@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+
+    <title>
+      bookkeep — a library system that cannot lend the same copy twice
+    </title>
+    <meta
+      name="description"
+      content="An open-source library management system: catalogue, copies, members and loans, on SQLite through Node's own driver. The same copy cannot be lent twice, because the row cannot exist."
+    />
+    <link rel="canonical" href="https://navesz.github.io/bookkeep/" />
+
+    <!-- The measured sRGB of --background in each theme, taken from
+         app/globals.css. Hex and not oklch(): a browser that cannot parse the
+         value drops the declaration and paints its own default. -->
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#f9f7f1"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#1a1611"
+    />
+
+    <!-- EVERY ASSET PATH ON THIS PAGE IS RELATIVE. The site is served from
+         /bookkeep/, not from the root of navesz.github.io, so a leading slash
+         would resolve one directory too high and 404. -->
+    <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+
+    <!-- og:image is the one exception, and it has to be: a crawler resolves it
+         with no document base, so it must be absolute. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="bookkeep" />
+    <meta property="og:url" content="https://navesz.github.io/bookkeep/" />
+    <meta
+      property="og:title"
+      content="bookkeep — a library system that cannot lend the same copy twice"
+    />
+    <meta
+      property="og:description"
+      content="Catalogue, copies, members and loans, on one machine and in one file. The second loan on a copy fails because a partial unique index refuses the row."
+    />
+    <meta property="og:image" content="https://navesz.github.io/bookkeep/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="bookkeep — three volumes on a shelf, one leaning into the gap left by the one on loan"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="bookkeep — a library system that cannot lend the same copy twice"
+    />
+    <meta
+      name="twitter:description"
+      content="Catalogue, copies, members and loans, on one machine and in one file. The second loan on a copy fails because a partial unique index refuses the row."
+    />
+    <meta
+      name="twitter:image"
+      content="https://navesz.github.io/bookkeep/og.png"
+    />
+
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+
+  <body>
+    <!-- First in the DOM, because its whole value is being the first thing a
+         keyboard reaches. -->
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="site-head">
+      <div class="shell site-head__inner">
+        <span class="wordmark">
+          <!-- The mark, inline: a shelf with a gap in it. Two volumes stand,
+               a third leans into the slot left by the one that is out on loan.
+               Inline rather than <img> so the volumes can take the page's own
+               ink and the board the bookcloth green, in either theme, without
+               a second request. -->
+          <!-- `width` and `height` as ATTRIBUTES, not only in the stylesheet.
+               An inline SVG carrying nothing but a viewBox has no intrinsic
+               size, so with CSS off it expands to fill its container: measured
+               at 900px wide, this mark became an 800px black slab above the
+               heading. The stylesheet still overrides both. -->
+          <svg
+            class="mark"
+            width="28"
+            height="28"
+            viewBox="0 0 100 100"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <mask
+              id="mark-bands"
+              maskUnits="userSpaceOnUse"
+              x="0"
+              y="0"
+              width="100"
+              height="100"
+            >
+              <rect width="100" height="100" fill="white" />
+              <rect x="7" y="56.7" width="24" height="2.6" rx="1.3" fill="black" />
+              <rect x="33" y="46.7" width="24" height="2.6" rx="1.3" fill="black" />
+              <rect
+                x="59.1"
+                y="52.7"
+                width="24"
+                height="2.6"
+                rx="1.3"
+                fill="black"
+                transform="rotate(-16.011 71.1 54)"
+              />
+            </mask>
+            <g mask="url(#mark-bands)">
+              <rect class="mark__shelf" x="6" y="82" width="86" height="10" rx="2.5" />
+              <rect class="mark__volume" x="9" y="34" width="20" height="52" rx="2.5" />
+              <rect class="mark__volume" x="35" y="18" width="20" height="68" rx="2.5" />
+              <rect
+                class="mark__volume"
+                x="38.072"
+                y="47"
+                width="67.856"
+                height="20"
+                rx="2.5"
+                transform="rotate(73.989 72 57)"
+              />
+            </g>
+          </svg>
+          <b>bookkeep</b>
+        </span>
+
+        <nav class="site-nav" aria-label="Sections">
+          <a href="#rule">The rule</a>
+          <a href="#screens">The screens</a>
+          <a href="#limits">The limits</a>
+          <a href="#run">Run it</a>
+          <a class="site-nav__repo" href="https://github.com/Navesz/bookkeep"
+            >Repository<span class="sr-only"> on GitHub</span></a
+          >
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <section class="hero">
+        <div class="shell">
+          <p class="eyebrow">Open-source library management</p>
+          <h1>bookkeep</h1>
+          <p class="claim">
+            A library system that cannot lend the same copy twice — because the
+            row cannot exist, not because someone remembered to check.
+          </p>
+          <p class="lead">
+            Catalogue, copies, members and loans, on one machine and in one
+            file. A Next.js application over SQLite through Node’s own driver:
+            no database server to run, no native module to compile, no accounts
+            to administer.
+          </p>
+
+          <p class="actions">
+            <a class="btn btn--primary" href="https://github.com/Navesz/bookkeep"
+              >Read the source</a
+            >
+            <a class="btn" href="#run">How to run it</a>
+          </p>
+
+          <dl class="facts">
+            <div>
+              <dt>Screens</dt>
+              <dd>9 routes</dd>
+            </div>
+            <div>
+              <dt>Test cases</dt>
+              <dd>69, on a real file</dd>
+            </div>
+            <div>
+              <dt>Under <code>lib/db/</code></dt>
+              <dd><code>node:</code> builtins only</dd>
+            </div>
+            <div>
+              <dt>Licence</dt>
+              <dd>Apache-2.0</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+
+      <div class="shell">
+        <aside class="notice" aria-labelledby="notice-title">
+          <h2 id="notice-title">This page is not the application.</h2>
+          <p>
+            bookkeep answers requests and writes to a file. It needs a Node
+            process and a disk it can write to, and GitHub Pages — which is
+            serving the page you are reading — gives it neither. So there is no
+            <em>try it</em> button here, and there cannot be one that works.
+            What follows is the real thing photographed on a laptop, and the
+            three commands that start it on yours.
+          </p>
+        </aside>
+      </div>
+
+      <!-- ───────────────────────────────────────────────── the one rule -->
+      <section id="rule" class="band">
+        <div class="shell">
+          <p class="eyebrow">The one rule</p>
+          <h2>A copy that is out cannot go out again</h2>
+
+          <div class="prose">
+            <p>
+              Two librarians scan the same barcode in the same second.
+              <em
+                >Select the open loans for this copy; if there are none,
+                insert</em
+              >
+              reads zero on both desks, inserts twice, and the shelf now owes
+              two people the same object. The window is milliseconds wide and it
+              opens on exactly the busy afternoon when two people are working
+              the desk — which is why testing does not catch it.
+            </p>
+            <p>So the rule is not in the application.</p>
+          </div>
+        </div>
+
+        <div class="shell">
+          <figure class="code-figure">
+            <pre class="code"><code><span class="kw">CREATE UNIQUE INDEX IF NOT EXISTS</span> <span class="nm">one_open_loan_per_copy</span>
+  <span class="kw">ON</span> loan (copy_id) <span class="kw">WHERE</span> returned_at <span class="kw">IS NULL</span>;</code></pre>
+            <figcaption><code>lib/db/schema.sql</code></figcaption>
+          </figure>
+        </div>
+
+        <div class="shell">
+          <div class="prose">
+          <p>
+            The second <code>INSERT</code> fails.
+            <code>lend()</code> in <code>lib/db/loans.ts</code> never asks
+            whether the copy is free: it inserts, catches SQLite’s
+            <code>UNIQUE constraint failed: loan.copy_id</code>,
+            and throws <code>CopyAlreadyOut</code>. Try, then translate — never
+            check, then act.
+          </p>
+          <p>
+            <strong><code>WHERE returned_at IS NULL</code> is what makes it
+            usable.</strong>
+            A closed loan leaves the index, so a copy that comes back goes out
+            again, and every loan it has ever been on stays in the table. The
+            constraint is on <em>open</em> loans, not on history.
+          </p>
+          </div>
+        </div>
+
+        <div class="shell">
+          <div class="cards">
+            <article class="card">
+              <h3>One scan is one statement</h3>
+              <p>
+                Nobody at a desk has ever seen a row id; the scanner reads a
+                sticker. So the barcode is resolved <em>inside</em> the write —
+                <code>INSERT … SELECT … WHERE barcode = ?</code>. An unknown
+                barcode selects no rows and nothing is inserted; a known one
+                whose copy is out still meets the index and is refused. Both
+                answers come from the database, with no gap between them.
+              </p>
+            </article>
+            <article class="card">
+              <h3>“Late” is a string comparison</h3>
+              <p>
+                Every timestamp is written by SQLite’s <code>datetime()</code>:
+                <code>YYYY-MM-DD HH:MM:SS</code>, UTC, fixed width. In that
+                format lexicographic order <em>is</em> chronological order, so
+                <code>due_at &lt; datetime('now')</code> is exact and needs no
+                parsing. There is no <code>is_overdue</code> column and no
+                midnight job — a loan goes late because the world moved.
+              </p>
+            </article>
+            <article class="card">
+              <h3>The test is the proof</h3>
+              <p>
+                <code>tests/loans.test.mjs</code> lends, lends the same copy
+                again, and asserts that exactly one open loan exists whatever
+                the caller tried. The 69 cases run against a real SQLite file in
+                a temporary directory, because a mock of the database would be a
+                mock of the one thing under test.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────────────────────────── the screens -->
+      <section id="screens" class="band">
+        <div class="shell">
+          <p class="eyebrow">What it does today</p>
+          <h2>Nine routes</h2>
+          <div class="prose">
+            <p>
+              Every one of these answers right now. The list below is written
+              out by hand, so treat <code>npm run build</code> as the version
+              that cannot go stale: it prints the routes that actually exist.
+            </p>
+          </div>
+        </div>
+
+        <div class="shell">
+          <dl class="routes">
+            <div>
+              <dt><code>/</code></dt>
+              <dd>
+                <b>Catalogue.</b> Search by title or author; partial words
+                match, so a fragment you half-remember is usually enough. Every
+                row carries how many of its copies are on the shelf right now.
+              </dd>
+            </div>
+            <div>
+              <dt><code>/books/:id</code></dt>
+              <dd>
+                <b>Book record.</b> The bibliographic record, then every
+                physical copy with its status, who has it and when it is due.
+                Lend or return from the row.
+              </dd>
+            </div>
+            <div>
+              <dt><code>/books/new</code></dt>
+              <dd>
+                <b>Add a book.</b> Title, author, year, and an ISBN that is
+                allowed to be missing — the ISBN was born in 1970 and a library
+                that refuses older books refuses its own rare shelf.
+              </dd>
+            </div>
+            <div>
+              <dt><code>/books/:id/copies/new</code></dt>
+              <dd>
+                <b>Add a copy.</b> One barcode, unique across the whole library,
+                because that is what the scanner reads and it has to resolve to
+                exactly one object.
+              </dd>
+            </div>
+            <div>
+              <dt><code>/desk</code></dt>
+              <dd>
+                <b>The desk.</b> Choose who is borrowing, scan the sticker,
+                Enter. Returning needs no member at all — the copy knows whose
+                loan is open.
+              </dd>
+            </div>
+            <div>
+              <dt><code>/members</code></dt>
+              <dd>
+                <b>Members.</b> Everyone who holds a card, and what each of them
+                has out.
+              </dd>
+            </div>
+            <div>
+              <dt><code>/members/:id</code></dt>
+              <dd>
+                <b>Member history.</b> Every loan, open or closed, open ones
+                first — the screen for “have they read this already?” and for
+                “who had this copy before it came back damaged?”
+              </dd>
+            </div>
+            <div>
+              <dt><code>/members/new</code></dt>
+              <dd><b>Issue a card.</b> A name and an e-mail address.</dd>
+            </div>
+            <div>
+              <dt><code>/overdue</code></dt>
+              <dd>
+                <b>Overdue.</b> Past the due date, longest first, with a return
+                button on every row. The first screen at opening time.
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="shell">
+          <figure class="shot">
+            <picture>
+              <source
+                media="(prefers-color-scheme: dark)"
+                srcset="./shot-catalogue-dark.png"
+              />
+              <img
+                src="./shot-catalogue-light.png"
+                width="2560"
+                height="1676"
+                loading="lazy"
+                decoding="async"
+                alt="The catalogue screen: a search field, then a list of fifteen books, each row showing the author, the year, and how many copies are available."
+              />
+            </picture>
+            <figcaption>
+              <code>/</code> — the catalogue. Availability is computed per row;
+              nothing stores it.
+            </figcaption>
+          </figure>
+
+          <figure class="shot">
+            <picture>
+              <source
+                media="(prefers-color-scheme: dark)"
+                srcset="./shot-book-dark.png"
+              />
+              <img
+                src="./shot-book-light.png"
+                width="2560"
+                height="1580"
+                loading="lazy"
+                decoding="async"
+                alt="The record for Pride and Prejudice: author, year, a missing ISBN, then three copies — one overdue, one on the shelf with a Lend button, one on loan and due back in fourteen days."
+              />
+            </picture>
+            <figcaption>
+              <code>/books/:id</code> — the whole vocabulary of the product in
+              one column:
+              <b class="pill pill--shelved">On the shelf</b>,
+              <b class="pill pill--on-loan">On loan</b>,
+              <b class="pill pill--overdue">Overdue</b>. Only the first has a
+              <em>Lend</em> button, and the index is what makes that true rather
+              than the button.
+            </figcaption>
+          </figure>
+
+          <figure class="shot">
+            <picture>
+              <source
+                media="(prefers-color-scheme: dark)"
+                srcset="./shot-desk-dark.png"
+              />
+              <img
+                src="./shot-desk-light.png"
+                width="2560"
+                height="1060"
+                loading="lazy"
+                decoding="async"
+                alt="The desk screen in dark mode: a Lend and Return toggle, a member picker, and a barcode field with the hint that a scanner types the barcode and presses Enter."
+              />
+            </picture>
+            <figcaption>
+              <code>/desk</code> — a scanner types the barcode and presses
+              Enter, which submits the form. There is nothing to click.
+            </figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────────────────────────── the limits -->
+      <section id="limits" class="band band--limits">
+        <div class="shell">
+          <p class="eyebrow">Stated as plainly as the features</p>
+          <h2>What it will not do</h2>
+          <div class="prose">
+            <p>
+              Three of these are load-bearing decisions rather than gaps waiting
+              to be filled. Knowing them before you clone is the point of
+              printing them here.
+            </p>
+          </div>
+        </div>
+
+        <div class="shell">
+          <ol class="limits">
+            <li>
+              <h3>There is no authentication</h3>
+              <div class="limits__body">
+              <p>
+                None. No accounts, no roles, no record of which librarian lent
+                what. <b>Anyone who can reach the port is the librarian.</b> Run
+                it on a machine where you control who can reach the port, and do
+                not put it on the open internet.
+              </p>
+              </div>
+            </li>
+            <li>
+              <h3><code>node:sqlite</code> is experimental</h3>
+              <div class="limits__body">
+              <p>
+                Node 24 ships SQLite 3.50.4 in its standard library, which is
+                what buys the empty dependency list under <code>lib/db/</code>.
+                The price is printed on every boot:
+              </p>
+              <pre
+                class="code code--quiet"
+              ><code>ExperimentalWarning: SQLite is an experimental feature
+and might change at any time</code></pre>
+              <p>
+                Its API can move between Node minor releases. Every call into it
+                lives behind <code>lib/db/connection.ts</code>, so trading it for
+                <code>better-sqlite3</code> means rewriting one file. The bet is
+                cheap to lose.
+              </p>
+              </div>
+            </li>
+            <li>
+              <h3>It cannot be hosted on a static host</h3>
+              <div class="limits__body">
+              <p>
+                Including this one. bookkeep answers requests and writes to a
+                file; GitHub Pages gives it neither a process nor a writable
+                disk, and no amount of configuration changes that.
+                <b>One machine with Node on it is the deployment.</b>
+              </p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <!-- ───────────────────────────────────────────────── run it -->
+      <section id="run" class="band">
+        <div class="shell">
+          <p class="eyebrow">On your own machine</p>
+          <h2>Run it</h2>
+          <div class="prose">
+            <p>The shortest sequence that actually works.</p>
+          </div>
+        </div>
+
+        <div class="shell">
+          <figure class="code-figure">
+            <pre
+              class="code"
+            ><code>git clone https://github.com/Navesz/bookkeep
+cd bookkeep
+npm ci
+npm run seed   <span class="cm"># 15 books, 28 copies, 5 members, 5 loans already out</span>
+npm run dev    <span class="cm"># http://localhost:3000</span></code></pre>
+            <figcaption>Node 24 — the version is pinned in <code>.nvmrc</code>.</figcaption>
+          </figure>
+        </div>
+
+        <div class="shell">
+          <div class="prose">
+          <p>
+            The database creates itself in the project root on first boot, from
+            <code>lib/db/schema.sql</code>, and <code>.gitignore</code> keeps it
+            out of the history: it holds member names and e-mail addresses, and
+            the repository is public. The schema file is idempotent, so booting
+            twice is safe.
+          </p>
+          <p>
+            The gate is one command, and CI on Ubuntu and Windows runs exactly
+            it, so green on your machine means something:
+          </p>
+          </div>
+          <figure class="code-figure">
+            <pre
+              class="code"
+            ><code>npm run verify   <span class="cm"># lint → typecheck → test → build</span>
+npm run secrets  <span class="cm"># scan everything Git tracks for credentials</span>
+npm run hooks    <span class="cm"># once per clone: arms pre-commit and commit-msg</span></code></pre>
+          </figure>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-foot">
+      <div class="shell site-foot__inner">
+        <p class="site-foot__links">
+          <a href="https://github.com/Navesz/bookkeep">Repository</a>
+          <a href="https://github.com/Navesz/bookkeep/blob/main/README.md"
+            >README</a
+          >
+          <a href="https://github.com/Navesz/bookkeep/blob/main/CONTRIBUTING.md"
+            >Contributing</a
+          >
+          <a href="https://github.com/Navesz/bookkeep/blob/main/LICENSE"
+            >Apache-2.0</a
+          >
+        </p>
+        <p class="site-foot__note">
+          This page is hand-written HTML and one stylesheet, served from
+          <code>docs/</code> on <code>main</code>. No build step, no framework,
+          and no request to anybody else’s server — a landing page for a project
+          whose rule is zero new dependencies should not open with a dozen of
+          them.
+        </p>
+        <p class="site-foot__note">Copyright 2026 Naves.</p>
+      </div>
+    </footer>
+
+    <script>
+      /*
+       * The only script on the page, and everything above it is already
+       * finished without it: the button does not exist in the markup, it is
+       * created here. With JavaScript off there is simply no button, and the
+       * command is still there to be selected and copied by hand.
+       */
+      ;(function () {
+        if (!navigator.clipboard) return
+        // Not `.code--quiet`: that block is a warning the program prints, not a
+        // command anybody wants on their clipboard.
+        document
+          .querySelectorAll("pre.code:not(.code--quiet)")
+          .forEach(function (pre) {
+          var source = pre.querySelector("code")
+          if (!source) return
+          var button = document.createElement("button")
+          button.type = "button"
+          button.className = "copy"
+          button.textContent = "Copy"
+          button.addEventListener("click", function () {
+            // The inner code element and not the block itself: the button
+            // is a child of the block by the time this runs, and copying the
+            // block would hand the reader the word "Copy" with the command.
+            navigator.clipboard.writeText(source.innerText).then(
+              function () {
+                button.textContent = "Copied"
+                setTimeout(function () {
+                  button.textContent = "Copy"
+                }, 1600)
+              },
+              function () {
+                button.textContent = "Press Ctrl-C"
+              }
+            )
+          })
+          pre.appendChild(button)
+        })
+      })()
+    </script>
+  </body>
+</html>

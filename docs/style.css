@@ -1,0 +1,948 @@
+/*
+ * bookkeep — the landing page.
+ *
+ * PAPER, INK AND BOOKCLOTH, borrowed whole from `app/globals.css`.
+ *
+ * This file cannot import the application's stylesheet: that one is Tailwind
+ * source and needs a build, and this page has none. So the tokens are COPIED,
+ * with their measured ratios, rather than approximated by eye — a landing page
+ * in a second palette is a second identity for the same product.
+ *
+ * Every value is declared TWICE: hex first, then the oklch it was measured
+ * from. A browser that does not parse `oklch()` drops the second declaration
+ * and keeps the first, so the page degrades to the same colour rather than to
+ * the user-agent default. The hexes are the oklch values taken through
+ * linear sRGB and rounded to 8 bits — the number the screen actually shows,
+ * which is not the number a float gives you.
+ *
+ * Ratios in the comments were computed the same way and agree with the ones
+ * written in `app/globals.css`.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Paper. Warm and off-white; a full white ground under a day of reading is
+     the glare people turn the brightness down to escape. */
+  --background: #f9f7f1;
+  --background: oklch(0.977 0.009 92);
+  --foreground: #211b14;
+  --foreground: oklch(0.226 0.016 68); /* 15.92:1 on background */
+  /* ABOVE the ground, not below it: a card is a sheet laid on the desk. */
+  --card: #fefdfa;
+  --card: oklch(0.994 0.004 92);
+  --muted: #f1efe7;
+  --muted: oklch(0.951 0.011 92);
+  --muted-foreground: #6b6359;
+  --muted-foreground: oklch(0.505 0.019 74); /* 5.52:1 on background,
+                                                5.81:1 on card,
+                                                5.13:1 on muted */
+  --secondary: #efece4;
+  --secondary: oklch(0.944 0.012 92);
+  --secondary-foreground: #342c23;
+  --secondary-foreground: oklch(0.298 0.019 68); /* 12.81:1 on background */
+
+  /* `--primary` stays INK and does not become green. Green on every principal
+     control is green that accents nothing. */
+  --primary: #29221a;
+  --primary: oklch(0.258 0.018 68);
+  --primary-foreground: #f9f7f1;
+  --primary-foreground: oklch(0.977 0.009 92); /* 14.65:1 on primary */
+
+  /* A decorative hairline — the rule between two rows, the edge of a card.
+     1.35:1 is under 3:1 ON PURPOSE: it identifies no control. */
+  --border: #dad6cd;
+  --border: oklch(0.878 0.013 88); /* 1.35:1 on background */
+  --ring: #2e734f;
+  --ring: oklch(0.5 0.09 158); /* 5.32:1 on background, 5.61:1 on card */
+
+  /* Bookcloth: the bottle green of a rebound spine, and the only saturated
+     family in the file. `--brand-subtle-foreground` is the darker cut that
+     survives being TEXT in a paragraph, which is why it is not the fill. */
+  --brand: #296646;
+  --brand: oklch(0.462 0.083 158); /* 6.36:1 on background, 6.70:1 on card */
+  --brand-foreground: #f9fbf3;
+  --brand-foreground: oklch(0.985 0.012 120); /* 6.53:1 on brand */
+  --brand-subtle: #ddf5e7;
+  --brand-subtle: oklch(0.948 0.031 160);
+  --brand-subtle-foreground: #1f593c;
+  --brand-subtle-foreground: oklch(0.418 0.079 158); /* 7.68:1 on background,
+                                                        7.17:1 on brand-subtle */
+  --brand-border: #569b74;
+  --brand-border: oklch(0.632 0.092 158); /* 3.09:1 on background */
+
+  /* Circulation status: on the shelf, out on loan, or late. Each pair is a
+     tinted paper plus the ink that goes on it. */
+  --shelved: #daf3e4;
+  --shelved: oklch(0.941 0.032 160);
+  --shelved-foreground: #195437;
+  --shelved-foreground: oklch(0.398 0.078 158); /* 7.58:1 on shelved */
+  --on-loan: #f9eccb;
+  --on-loan: oklch(0.945 0.045 88);
+  --on-loan-foreground: #734d16;
+  --on-loan-foreground: oklch(0.452 0.085 72); /* 6.38:1 on on-loan */
+  --overdue: #fee7e2;
+  --overdue: oklch(0.944 0.026 32);
+  --overdue-foreground: #a42a23;
+  --overdue-foreground: oklch(0.478 0.16 28); /* 6.05:1 on overdue,
+                                                 6.68:1 on background */
+
+  /* The veil and the ruled register. Ink, not black: `black/10` is the one
+     literal colour a template always leaves behind. */
+  --elevation: rgba(33, 27, 20, 0.1);
+  --elevation: oklch(0.226 0.05 68 / 0.1);
+  --rule: rgba(33, 27, 20, 0.07);
+  --rule: oklch(0.226 0.016 68 / 0.07);
+  --rule-margin: rgba(41, 102, 70, 0.16);
+  --rule-margin: oklch(0.462 0.083 158 / 0.16);
+
+  --radius: 0.5rem;
+
+  /* Three faces, three jobs — and all three are the reader's own, because a
+     web font is a request to a CDN and this page makes none. A serif for
+     headings, since a library system's headings should look like something
+     you read; the interface sans for running text; and a mono for the ISBNs,
+     barcodes and SQL, which are read character by character. */
+  --font-sans:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    "Noto Sans", sans-serif;
+  --font-heading:
+    ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia,
+    "Times New Roman", serif;
+  --font-mono:
+    ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+/*
+ * The reading room at night. NOT the light palette inverted: paper has no dark
+ * mode. L 0.205 rather than near-black, because light text on near-black
+ * blooms; hue 76 keeps the warmth, so this is a room with a lamp in it.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --background: #1a1611;
+    --background: oklch(0.205 0.012 76);
+    --foreground: #efede5;
+    --foreground: oklch(0.945 0.011 92); /* 15.35:1 on background */
+    --card: #25201a;
+    --card: oklch(0.248 0.013 76);
+    --muted: #322d27;
+    --muted: oklch(0.302 0.014 76);
+    --muted-foreground: #afa99d;
+    --muted-foreground: oklch(0.735 0.018 84); /* 7.70:1 on background,
+                                                  6.91:1 on card,
+                                                  5.83:1 on muted */
+    --secondary: #322d27;
+    --secondary: oklch(0.302 0.014 76);
+    --secondary-foreground: #eeebe3;
+    --secondary-foreground: oklch(0.94 0.011 92); /* 15.11:1 on background */
+
+    --primary: #e7e4da;
+    --primary: oklch(0.918 0.013 92);
+    --primary-foreground: #1e1913;
+    --primary-foreground: oklch(0.218 0.014 72); /* 13.71:1 on primary */
+
+    /* Solid, not `white / 10%`: a translucent border over three surfaces of
+       different lightness renders three contrasts, none measurable. */
+    --border: #3e3932;
+    --border: oklch(0.348 0.014 78); /* 1.57:1 on background */
+    --ring: #60bf90;
+    --ring: oklch(0.735 0.115 160); /* 8.02:1 on background, 7.19:1 on card */
+
+    /* The same cloth, lifted. At L 0.462 on charcoal the green goes to mud. */
+    --brand: #67c696;
+    --brand: oklch(0.755 0.115 160); /* 8.65:1 on background, 7.76:1 on card */
+    --brand-foreground: #081a11;
+    --brand-foreground: oklch(0.198 0.03 160); /* 8.66:1 on brand */
+    --brand-subtle: #1a3a2a;
+    --brand-subtle: oklch(0.318 0.048 160);
+    --brand-subtle-foreground: #87dcaf;
+    --brand-subtle-foreground: oklch(0.828 0.105 160); /* 11.04:1 on background,
+                                                          7.66:1 on brand-subtle */
+    --brand-border: #3a805e;
+    --brand-border: oklch(0.545 0.09 160); /* 3.80:1 on background */
+
+    --shelved: #163626;
+    --shelved: oklch(0.302 0.048 160);
+    --shelved-foreground: #83dbad;
+    --shelved-foreground: oklch(0.822 0.108 160); /* 7.99:1 on shelved */
+    --on-loan: #3e3016;
+    --on-loan: oklch(0.318 0.045 82);
+    --on-loan-foreground: #ebc879;
+    --on-loan-foreground: oklch(0.845 0.105 86); /* 7.97:1 on on-loan */
+    --overdue: #4c231f;
+    --overdue: oklch(0.312 0.062 28);
+    --overdue-foreground: #fd9f90;
+    --overdue-foreground: oklch(0.795 0.115 30); /* 6.72:1 on overdue,
+                                                    9.03:1 on background */
+
+    --elevation: rgba(20, 17, 12, 0.62);
+    --elevation: oklch(0.08 0.018 76 / 0.62);
+    --rule: rgba(239, 237, 229, 0.06);
+    --rule: oklch(0.945 0.011 92 / 0.06);
+    --rule-margin: rgba(103, 198, 150, 0.18);
+    --rule-margin: oklch(0.755 0.115 160 / 0.18);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────── the base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* Nothing on this page is sticky, but an in-page anchor still wants air
+     above its target. */
+  scroll-padding-top: 5rem;
+}
+
+/* Smooth scrolling is a comfort, not a requirement: for someone who asked the
+   operating system for less motion, the instant jump is correct. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  /* 1.6 and not the 1.75 a documentation site wants. */
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  /* `balance` spreads a heading's words across its lines instead of stranding
+     one; running text only affords `pretty`, which kills the orphan. */
+  text-wrap: balance;
+  margin: 0;
+}
+
+p,
+li,
+dd,
+figcaption {
+  text-wrap: pretty;
+}
+
+h1 {
+  font-size: clamp(2.75rem, 2rem + 3.4vw, 4.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.028em;
+}
+
+h2 {
+  font-size: clamp(1.75rem, 1.4rem + 1.5vw, 2.4rem);
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+}
+
+h3 {
+  font-size: 1.125rem;
+  line-height: 1.35;
+  letter-spacing: -0.008em;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  /* Mono faces run large next to a sans at the same nominal size. */
+  font-size: 0.875em;
+  letter-spacing: 0.01em;
+}
+
+/* An identifier like `one_open_loan_per_copy` has no spaces in it, so on a
+   narrow screen it is a single 22-character word that a paragraph cannot
+   break — and one of those is all it takes to push the whole page sideways. */
+code {
+  overflow-wrap: break-word;
+}
+
+a {
+  color: var(--brand-subtle-foreground); /* 7.68:1 light / 11.04:1 dark */
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: from-font;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* The one rule that has to survive every component below it: a focus that is
+   not visible is a keyboard trap dressed as a style choice. */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background-color: var(--brand);
+  color: var(--brand-foreground); /* 6.53:1 light / 8.66:1 dark */
+}
+
+img,
+svg,
+picture {
+  max-width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Moved out of sight with a transform, not with `display:none` or
+   `visibility:hidden` — both of those take the link out of the tab order,
+   which is the one thing it has to stay in. */
+.skip {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 50;
+  transform: translateY(-6rem);
+  background: var(--brand);
+  color: var(--brand-foreground);
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip:focus {
+  transform: translateY(0);
+}
+
+#main:focus {
+  outline: none;
+}
+
+.shell {
+  width: 100%;
+  max-width: 68rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+/* Running text is set narrow. A 68rem measure is for a layout, not a
+   paragraph. */
+.prose {
+  max-width: 42rem;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────── the head */
+
+.site-head {
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+}
+
+.site-head__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  min-height: 4rem;
+  padding-block: 0.75rem;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Lower case, because the product is called `bookkeep`, the way a command
+   is. */
+.wordmark b {
+  font-weight: 600;
+}
+
+.mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+}
+
+/* The volumes take the page's ink and the board the bookcloth, so the mark
+   is correct in both themes from one drawing. */
+.mark__volume {
+  fill: currentColor;
+}
+
+.mark__shelf {
+  fill: var(--brand);
+}
+
+.site-nav {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.1rem;
+  font-size: 0.9375rem;
+}
+
+.site-nav a {
+  color: var(--muted-foreground); /* 5.52:1 light / 7.70:1 dark */
+  text-decoration: none;
+  padding-block: 0.2rem;
+}
+
+.site-nav a:hover,
+.site-nav a:focus-visible {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
+.site-nav__repo {
+  color: var(--brand-subtle-foreground) !important;
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────────────────────── the hero */
+
+.hero {
+  position: relative;
+  padding-block: clamp(3rem, 1.5rem + 6vw, 6rem) clamp(2rem, 1rem + 4vw, 3.5rem);
+  overflow: hidden;
+}
+
+/*
+ * THE RULED REGISTER: the horizontal lines of an accession ledger plus the one
+ * vertical rule that fences off its margin column. Pure gradients — no image,
+ * no SVG, no request — and it changes theme by itself, because both colours
+ * are tokens. Ruling that runs into the edge of the viewport reads as a
+ * rendering fault rather than as a texture, so it is masked out before it gets
+ * there.
+ */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(2rem - 1px),
+      var(--rule) calc(2rem - 1px) 2rem
+    ),
+    linear-gradient(
+      to right,
+      transparent 0 4.5rem,
+      var(--rule-margin) 4.5rem calc(4.5rem + 1px),
+      transparent calc(4.5rem + 1px)
+    );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 45%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, #000 0%, #000 45%, transparent 100%);
+}
+
+.hero > .shell {
+  position: relative;
+}
+
+.eyebrow {
+  font-size: 0.8125rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--brand-subtle-foreground); /* 7.68:1 light / 11.04:1 dark */
+  margin: 0 0 0.75rem;
+}
+
+.hero h1 {
+  margin-bottom: 1.25rem;
+}
+
+/* The claim. Set in the reading face at lead size, because it is the one
+   sentence on the page that has to be read rather than scanned. */
+.claim {
+  font-family: var(--font-heading);
+  font-size: clamp(1.3125rem, 1.05rem + 1.15vw, 1.875rem);
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+  max-width: 30ch;
+  margin: 0 0 1.25rem;
+}
+
+.lead {
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  color: var(--muted-foreground); /* 5.52:1 light / 7.70:1 dark */
+  max-width: 46rem;
+  margin-bottom: 2rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.15rem;
+  border: 1px solid var(--brand-border); /* 3.09:1 light / 3.80:1 dark */
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--brand-subtle-foreground); /* 8.09:1 light / 9.91:1 dark */
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.btn:hover {
+  background: var(--brand-subtle);
+  color: var(--brand-subtle-foreground); /* 7.17:1 light / 7.66:1 dark */
+}
+
+.btn--primary {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: var(--brand-foreground); /* 6.53:1 light / 8.66:1 dark */
+}
+
+.btn--primary:hover {
+  background: var(--brand);
+  color: var(--brand-foreground);
+  filter: brightness(1.08);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1px;
+  margin: 0;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.facts > div {
+  min-width: 0;
+  background: var(--card);
+  padding: 0.85rem 1rem;
+}
+
+.facts dt {
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground); /* 5.81:1 light / 6.91:1 dark */
+  margin-bottom: 0.15rem;
+}
+
+.facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.0625rem;
+}
+
+/* ────────────────────────────────────────────────────────── the honest bit */
+
+.notice {
+  border: 1px solid var(--brand-border);
+  border-left-width: 4px;
+  border-radius: var(--radius);
+  background: var(--brand-subtle);
+  color: var(--brand-subtle-foreground); /* 7.17:1 light / 7.66:1 dark */
+  padding: 1.25rem 1.35rem;
+  margin-block: 1rem 3rem;
+}
+
+.notice h2 {
+  font-size: 1.1875rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  color: inherit;
+}
+
+.notice p {
+  margin: 0;
+  max-width: 58ch;
+  color: inherit;
+}
+
+/* ────────────────────────────────────────────────────────────── the bands */
+
+.band {
+  padding-block: clamp(2.5rem, 1.5rem + 4vw, 4.5rem);
+  border-top: 1px solid var(--border);
+}
+
+.band > .shell + .shell {
+  margin-top: 1.75rem;
+}
+
+.band h2 {
+  margin-bottom: 1rem;
+}
+
+.band--limits {
+  background: var(--muted);
+}
+
+/* ──────────────────────────────────────────────────────────────── the code */
+
+.code-figure {
+  margin: 0;
+}
+
+.code-figure + .code-figure,
+.prose + .code-figure {
+  margin-top: 1.25rem;
+}
+
+pre.code {
+  position: relative;
+  margin: 0;
+  padding: 1.15rem 1.25rem;
+  /* Wide content scrolls inside its own box. The page body never does. */
+  overflow-x: auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--brand-border);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 1px var(--elevation), 0 4px 10px -4px var(--elevation);
+}
+
+pre.code code {
+  font-size: inherit;
+  letter-spacing: inherit;
+}
+
+pre.code .kw {
+  color: var(--brand-subtle-foreground); /* 8.09:1 light / 9.91:1 dark */
+  font-weight: 700;
+}
+
+pre.code .nm {
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+pre.code .cm {
+  color: var(--muted-foreground); /* 5.81:1 light / 6.91:1 dark */
+}
+
+pre.code--quiet {
+  border-left-color: var(--border);
+  color: var(--muted-foreground); /* 5.81:1 light / 6.91:1 dark */
+  box-shadow: none;
+}
+
+.code-figure figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground); /* 5.52:1 light / 7.70:1 dark */
+}
+
+/* Created by script, so it does not exist when script does not run. */
+.copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.6rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  color: var(--muted-foreground); /* 5.81:1 light / 6.91:1 dark */
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 0.6);
+  cursor: pointer;
+  opacity: 0;
+}
+
+pre.code:hover .copy,
+.copy:focus-visible {
+  opacity: 1;
+}
+
+.copy:hover {
+  color: var(--foreground);
+}
+
+/* Coarse pointers get no hover, so the button would never appear. */
+@media (hover: none) {
+  .copy {
+    opacity: 1;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────── the cards */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+.card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.card p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground); /* 5.81:1 light / 6.91:1 dark */
+}
+
+.card code {
+  color: var(--foreground); /* 16.76:1 light / 13.78:1 dark */
+}
+
+/* ─────────────────────────────────────────────────────────────── the routes */
+
+.routes {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+}
+
+.routes > div {
+  display: grid;
+  /* Two columns on a desk, stacked on a phone — the path is the label and it
+     has to keep its own line rather than be hyphenated into the prose. */
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: 0.25rem 1.5rem;
+  padding: 0.9rem 1.15rem;
+  align-items: baseline;
+}
+
+.routes > div + div {
+  border-top: 1px solid var(--border);
+}
+
+.routes dt {
+  font-weight: 400;
+}
+
+.routes dt code {
+  color: var(--brand-subtle-foreground); /* 8.09:1 light / 9.91:1 dark */
+  font-size: 0.8125rem;
+  letter-spacing: 0.03em;
+  word-break: break-word;
+}
+
+.routes dd {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground); /* 5.81:1 light / 6.91:1 dark */
+}
+
+.routes dd b {
+  color: var(--foreground); /* 16.76:1 light / 13.78:1 dark */
+  font-weight: 600;
+}
+
+@media (max-width: 44rem) {
+  .routes > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── the screenshots */
+
+.shot {
+  margin: 0 0 2rem;
+}
+
+.shot:last-child {
+  margin-bottom: 0;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 4px var(--elevation), 0 16px 40px -12px var(--elevation);
+}
+
+.shot figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  color: var(--muted-foreground); /* 5.52:1 light / 7.70:1 dark */
+  max-width: 52rem;
+}
+
+/* The three words the product knows, coloured the way the application colours
+   them, so the caption and the screenshot agree. */
+.pill {
+  display: inline-block;
+  padding: 0.05em 0.5em;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pill--shelved {
+  background: var(--shelved);
+  color: var(--shelved-foreground); /* 7.58:1 light / 7.99:1 dark */
+}
+
+.pill--on-loan {
+  background: var(--on-loan);
+  color: var(--on-loan-foreground); /* 6.38:1 light / 7.97:1 dark */
+}
+
+.pill--overdue {
+  background: var(--overdue);
+  color: var(--overdue-foreground); /* 6.05:1 light / 6.72:1 dark */
+}
+
+/* ─────────────────────────────────────────────────────────────── the limits */
+
+.limits {
+  list-style: none;
+  counter-reset: limit;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /*
+   * `minmax(0, 1fr)` AND NOT THE IMPLICIT `auto`. A grid track sized `auto`
+   * takes max-content as its growth limit, and one of these items contains a
+   * <pre> whose max-content is the full unwrapped line — so the track grew to
+   * 542px inside a 335px column and pushed the entire document sideways at
+   * 375px wide. Measured; the `overflow-x: auto` on the <pre> does not save
+   * you, because the track is sized from the content before the scrollbox is.
+   */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.limits > li {
+  counter-increment: limit;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--overdue-foreground);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.35rem;
+  /* The same register as the routes above: the heading holds the left column
+     and the body fills the right, so a limit is as easy to scan as a feature.
+     `minmax(0, …)` on both tracks for the reason spelled out on `.limits`. */
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  gap: 0.5rem 2.5rem;
+  align-items: start;
+}
+
+@media (max-width: 52rem) {
+  .limits > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.limits h3 {
+  margin-bottom: 0.5rem;
+}
+
+.limits h3::before {
+  content: counter(limit) ". ";
+  color: var(--overdue-foreground); /* 7.04:1 light / 8.11:1 dark */
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+
+.limits p {
+  max-width: 62ch;
+  color: var(--muted-foreground); /* 5.81:1 light / 6.91:1 dark */
+}
+
+.limits p:last-child {
+  margin-bottom: 0;
+}
+
+.limits b,
+.limits code {
+  color: var(--foreground); /* 16.76:1 light / 13.78:1 dark */
+}
+
+.limits pre.code {
+  margin-block: 0 1rem;
+  background: var(--muted);
+}
+
+/* ─────────────────────────────────────────────────────────────── the footer */
+
+.site-foot {
+  border-top: 1px solid var(--border);
+  padding-block: 2.5rem 3.5rem;
+}
+
+.site-foot__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1.25rem;
+  font-weight: 600;
+}
+
+.site-foot__note {
+  max-width: 56ch;
+  font-size: 0.875rem;
+  color: var(--muted-foreground); /* 5.52:1 light / 7.70:1 dark */
+}
+
+.site-foot__note:last-child {
+  margin-bottom: 0;
+}
