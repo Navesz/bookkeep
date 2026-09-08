@@ -190,10 +190,13 @@ export function seed(): SeedSummary {
  * a second file that can drift from this one. The comparison is false when the
  * module is imported, so the tests get `seed()` without the side effect.
  *
- * WHY NOT `import.meta.main`: it exists in Node 24 and reads better, but it is
+ * WHY NOT `import.meta.main`: it exists in Node 24 and reads better, but it was
  * absent from the `ImportMeta` type in `@types/node@20`, which this project
- * pins — so it runs fine and fails `npm run typecheck`. `pathToFileURL` is the
- * same comparison with types that exist, and it is the idiom already used in
+ * pinned when this line was written — so it ran fine and failed
+ * `npm run typecheck`. The types are on `^24` now and the objection has
+ * expired; the form below stays because it costs nothing and works on both.
+ * `pathToFileURL` is the same comparison with types that exist, and it is the
+ * idiom already used in
  * the test files, where the reason is also Windows: comparing against the raw
  * `process.argv[1]` never matches, because `import.meta.url` is a file:// URL
  * and `C:\...` is not.

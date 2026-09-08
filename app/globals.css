@@ -4,126 +4,531 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * PAPER, INK AND BOOKCLOTH.
+ *
+ * What came out of `shadcn create` was `oklch(L 0 0)` on every single token:
+ * chroma exactly zero, from the background to the border. Absolute grey is not
+ * a material — nothing in a library is absolute grey — and it is the single
+ * thing that makes a product look like an unfinished template.
+ *
+ * The three materials this system is about:
+ *
+ *   PAPER   the whole light base. Hue 88-92 (warm yellow), chroma 0.004-0.021.
+ *           Not white: white is a screen, and a screen is not what a catalogue
+ *           card is made of. The background sits at L 0.977 and the CARD sits
+ *           ABOVE it at 0.994, so a card reads as a fresh sheet laid on the
+ *           desk rather than as a hole cut into it.
+ *   INK     the foreground, hue 68, chroma 0.016. Iron-gall ink is not black —
+ *           it oxidises brown, which is why every old accession register looks
+ *           the way it does. That brown is the warmth in `--foreground`.
+ *   CLOTH   the accent, hue 158-160. Library buckram: the bottle green of a
+ *           rebound spine. It is the only saturated family in the file and it
+ *           is spent sparingly.
+ *
+ * The dark theme is NOT the same palette inverted. Paper has no dark mode; the
+ * reading room does. The dark base keeps hue 76 at low chroma — a warm charcoal
+ * rather than the blue-black every framework ships — and the cloth green is
+ * pushed up in lightness, because at L 0.46 on charcoal a green reads as mud.
+ *
+ * EVERY ratio written in a comment below was MEASURED, not estimated:
+ * oklch -> linear sRGB -> 8-bit round -> relative luminance -> WCAG 2.x. The
+ * 8-bit rounding matters; the number a float gives you is not the number the
+ * screen shows. Every value is inside the sRGB gamut, so nothing here depends
+ * on the browser clipping it into range to render.
+ *
+ * Targets: 4.5:1 for anything that is body text, 3:1 for large text, for the
+ * border of a control and for a focus ring. Where a pair is deliberately below
+ * 3:1 the comment says why.
+ */
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: var(--font-sans);
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
+  /*
+   * `app/layout.tsx` downloads Geist Mono and puts `--font-mono` on `<html>`,
+   * but without this line the Tailwind `font-mono` utility falls back to its
+   * own default stack and the downloaded font never paints a glyph. The
+   * fallback list after it is the real one, for the frame before the font
+   * arrives. Monospace is not decoration here: an ISBN, a call number and a
+   * barcode are read DIGIT BY DIGIT, and proportional figures make `1` and `l`
+   * the same shape.
+   */
+  --font-mono: var(--font-mono, ui-monospace, "Cascadia Mono", monospace);
+  --font-sans: var(--font-sans);
+  /* Literata is Google's reading typeface — it was drawn for e-book body
+     text. A library system gets its headings set in a face made for reading
+     books; the interface itself stays in the sans, because a table of 400
+     loans is scanned, not read. */
+  --font-heading: var(--font-serif, ui-serif, Georgia, serif);
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+
+  /* Bookcloth, under NEW names on purpose. shadcn's `--accent` is the hover
+     surface of a menu item, not the colour of the product — hijacking that
+     name would paint every dropdown row green. `--brand-*` is where the green
+     means "this is the thing", and it is read by the mark, the active
+     navigation item and the primary call to action. */
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-brand-subtle-foreground: var(--brand-subtle-foreground);
+  --color-brand-border: var(--brand-border);
+
+  /*
+   * CIRCULATION STATUS. A copy is on the shelf, out on loan, or late — that is
+   * the entire vocabulary of the product, and it appears on every row of every
+   * table. Three named pairs, so the meaning is decided once here instead of
+   * being re-picked out of the palette on each page.
+   *
+   * `--overdue` sits on the same hue as `--destructive` deliberately. A late
+   * book and a failed form are both "something is wrong"; giving them two
+   * different alarm colours teaches the reader that one of them is not urgent.
+   */
+  --color-shelved: var(--shelved);
+  --color-shelved-foreground: var(--shelved-foreground);
+  --color-on-loan: var(--on-loan);
+  --color-on-loan-foreground: var(--on-loan-foreground);
+  --color-overdue: var(--overdue);
+  --color-overdue-foreground: var(--overdue-foreground);
+
+  --color-rule: var(--rule);
+  --color-rule-margin: var(--rule-margin);
+  --color-veil: var(--veil);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /*
+   * The scale. This is an application, not an essay: the reader spends the day
+   * on tables of copies and loans, so the body line-height is 1.6 and not the
+   * 1.75 a documentation site wants — looser leading in a dense table pushes
+   * rows apart until fewer of them fit and scanning gets slower, which is the
+   * opposite of the point.
+   *
+   * Headings go the other way: the bigger they get, the tighter the leading
+   * and the tracking, because at 3rem the default spacing opens holes between
+   * the words. `clamp()` on the top three — on a phone a fixed 3rem `h1` takes
+   * four lines and eats the fold.
+   */
+  --text-h1: clamp(2rem, 1.5rem + 2.1vw, 2.75rem);
+  --text-h1--line-height: 1.12;
+  --text-h1--letter-spacing: -0.022em;
+  --text-h1--font-weight: 600;
+  --text-h2: clamp(1.5rem, 1.28rem + 1vw, 1.9375rem);
+  --text-h2--line-height: 1.22;
+  --text-h2--letter-spacing: -0.016em;
+  --text-h2--font-weight: 600;
+  --text-h3: clamp(1.1875rem, 1.11rem + 0.4vw, 1.375rem);
+  --text-h3--line-height: 1.35;
+  --text-h3--letter-spacing: -0.01em;
+  --text-h3--font-weight: 600;
+  --text-h4: 1.0625rem;
+  --text-h4--line-height: 1.45;
+  --text-h4--letter-spacing: -0.005em;
+  --text-h4--font-weight: 600;
+  --text-lead: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --text-lead--line-height: 1.6;
+  --text-lead--letter-spacing: -0.006em;
+  --text-lead--font-weight: 400;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-body--letter-spacing: 0em;
+  /* The row of a catalogue table: slightly under 1rem, with leading tight
+     enough that twenty rows fit on a laptop screen. */
+  --text-row: 0.875rem;
+  --text-row--line-height: 1.45;
+  --text-row--letter-spacing: 0.002em;
+  --text-caption: 0.8125rem;
+  --text-caption--line-height: 1.5;
+  --text-caption--letter-spacing: 0.006em;
+  /* A call number or an ISBN. Tracked OPEN, not tight: strings of digits with
+     no word shape need the letterfit that prose does not. */
+  --text-mark: 0.8125rem;
+  --text-mark--line-height: 1.4;
+  --text-mark--letter-spacing: 0.03em;
+
+  /* Two heights of elevation and no more. Shadow is depth, and depth with
+     seven steps stops describing a hierarchy. */
+  --shadow-raised: 0 1px 1px var(--elevation), 0 4px 10px -4px var(--elevation);
+  --shadow-overlay:
+    0 2px 4px var(--elevation), 0 16px 40px -12px var(--elevation);
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+  /* 0.5rem and not the 0.625rem the template ships. A card here is a sheet of
+     paper and a table cell is a ruled box; the rounder the corner, the more
+     the thing reads as a mobile app tile and the less as a record. */
+  --radius: 0.5rem;
+  /* The height of the sticky header. It lives here, in `:root`, and not in
+     `@theme inline`, because a theme variable declared inline is substituted
+     into the utilities and never emitted as a custom property — `var()` on it
+     at run time would resolve to nothing. As a real property it can be read
+     both by the `scroll-padding-top` below and by `h-(--header-offset)` on the
+     header itself, so the offset and the header come out of ONE number. */
+  --header-offset: 4rem;
+
+  /* Paper. Warm and slightly off-white, at L 0.977 — a full white ground under
+     a day of reading is the glare people turn the brightness down to escape. */
+  --background: oklch(0.977 0.009 92);
+  --foreground: oklch(0.226 0.016 68); /* 15.92:1 on background */
+  /* ABOVE the ground, not below it: the card is the sheet on the desk. */
+  --card: oklch(0.994 0.004 92);
+  --card-foreground: oklch(0.226 0.016 68); /* 16.76:1 on card */
+  --popover: oklch(0.994 0.004 92);
+  --popover-foreground: oklch(0.226 0.016 68); /* 16.76:1 on popover */
+
+  /*
+   * `--primary` STAYS INK. It does not become green, and the reason is
+   * hierarchy: `--primary` is the default fill of `Button`, of `Badge` and of
+   * everything shadcn calls principal. Green here would paint every button on
+   * the page green and the accent would stop accenting anything. The green
+   * lives in `--ring`, in `--sidebar-primary` and in the `--brand-*` family,
+   * which is where it actually means "look here".
+   */
+  --primary: oklch(0.258 0.018 68);
+  --primary-foreground: oklch(0.977 0.009 92); /* 14.65:1 on primary */
+  --secondary: oklch(0.944 0.012 92);
+  --secondary-foreground: oklch(0.298 0.019 68); /* 11.62:1 on secondary */
+  --muted: oklch(0.951 0.011 92);
+  --muted-foreground: oklch(
+    0.505 0.019 74
+  ); /* 5.13:1 on muted, 5.52:1 on
+                                                background, 5.81:1 on card */
+
+  /* The hover surface of a menu row: paper with cloth washed through it, so
+     the highlight belongs to the house without being a green bar. */
+  --accent: oklch(0.944 0.021 158);
+  --accent-foreground: oklch(0.318 0.055 160); /* 10.64:1 on accent */
+
+  /* base-nova draws the destructive button as `bg-destructive/10` with
+     `text-destructive` — the token is used AS TEXT, so it is held to 4.5:1 and
+     not to the 3:1 a solid fill would need. */
+  --destructive: oklch(0.512 0.185 26); /* 5.86:1 on background, 6.17:1 card */
+  --destructive-foreground: oklch(0.985 0.008 92); /* 6.02:1 on destructive */
+
+  /* `--border` is a decorative hairline — the rule between two table rows, the
+     edge of a card. 1.35:1 is under 3:1 ON PURPOSE, because it identifies no
+     control. `--input` is the border of a form field, which DOES identify one,
+     so it is held to 3:1. Conflating the two either makes every table look
+     like a spreadsheet grid or makes every input invisible. */
+  --border: oklch(0.878 0.013 88); /* 1.35:1 on background */
+  --input: oklch(0.612 0.021 78); /* 3.53:1 on background, 3.72:1 on card */
+  --ring: oklch(0.5 0.09 158); /* 5.32:1 on background, 5.61:1 on card */
+
+  /* Bookcloth. `--brand` fills; `--brand-subtle-foreground` is the darker cut
+     that survives being TEXT inside a paragraph — a link — which is why it is
+     not the same value as the fill. */
+  --brand: oklch(0.462 0.083 158); /* 6.36:1 on background */
+  --brand-foreground: oklch(0.985 0.012 120); /* 6.53:1 on brand */
+  --brand-subtle: oklch(0.948 0.031 160);
+  --brand-subtle-foreground: oklch(
+    0.418 0.079 158
+  ); /* 7.68:1 on background,
+                                                        7.17:1 on brand-subtle */
+  --brand-border: oklch(0.632 0.092 158); /* 3.09:1 on background */
+
+  --sidebar: oklch(0.958 0.012 92);
+  --sidebar-foreground: oklch(0.246 0.017 68); /* 14.40:1 on sidebar */
+  --sidebar-primary: oklch(0.462 0.083 158); /* 6.03:1 on sidebar */
+  --sidebar-primary-foreground: oklch(0.985 0.012 120); /* 6.53:1 */
+  --sidebar-accent: oklch(0.932 0.024 158);
+  --sidebar-accent-foreground: oklch(0.318 0.055 160); /* 10.29:1 */
+  --sidebar-border: oklch(0.898 0.012 88); /* 1.20:1 on sidebar, decorative */
+  --sidebar-ring: oklch(0.5 0.09 158); /* 5.05:1 on sidebar */
+
+  /* Circulation. Each pair is a tinted paper plus the ink that goes on it, so
+     a status badge is legible whether it is read on the badge or lifted out as
+     bare text on the page. */
+  --shelved: oklch(0.941 0.032 160);
+  --shelved-foreground: oklch(
+    0.398 0.078 158
+  ); /* 7.58:1 on shelved,
+                                                   8.29:1 on background */
+  --on-loan: oklch(0.945 0.045 88);
+  --on-loan-foreground: oklch(
+    0.452 0.085 72
+  ); /* 6.38:1 on on-loan,
+                                                  7.00:1 on background */
+  --overdue: oklch(0.944 0.026 32);
+  --overdue-foreground: oklch(
+    0.478 0.16 28
+  ); /* 6.05:1 on overdue,
+                                                 6.68:1 on background */
+
+  /* Cloth, brass, indigo, clay, stone — five materials, not five greys. Each
+     one clears 3:1 on the background, so a single series is still findable in
+     a chart when it is the only one drawn. */
+  --chart-1: oklch(0.462 0.083 158); /* 6.36:1 on background */
+  --chart-2: oklch(0.63 0.115 78); /* 3.33:1 */
+  --chart-3: oklch(0.52 0.1 268); /* 5.20:1 */
+  --chart-4: oklch(0.58 0.13 25); /* 4.26:1 */
+  --chart-5: oklch(0.645 0.03 84); /* 3.07:1 */
+
+  /* The veil behind a dialog or a sheet. Ink, not black: `black/10` is the one
+     literal colour a template always leaves behind, and it does nothing at all
+     in the dark theme. Here the pigment is the page's own ink and only the
+     alpha changes between themes. */
+  --veil: oklch(0.226 0.016 68 / 0.3);
+  --elevation: oklch(0.226 0.05 68 / 0.1);
+  /* The ruled register: the faint horizontal lines of an accession ledger, and
+     the single vertical rule that marks off its margin column. */
+  --rule: oklch(0.226 0.016 68 / 0.07);
+  --rule-margin: oklch(0.462 0.083 158 / 0.16);
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+  /* The reading room at night. L 0.205 and not the 0.145 the template ships:
+     light text on a near-black ground blooms (halation), and a charcoal ground
+     cuts that smear without giving up the impression of dark. Hue 76 keeps the
+     warmth — this is a room with a lamp in it, not a void. */
+  --background: oklch(0.205 0.012 76);
+  --foreground: oklch(0.945 0.011 92); /* 15.35:1 on background */
+  --card: oklch(0.248 0.013 76);
+  --card-foreground: oklch(0.945 0.011 92); /* 13.78:1 on card */
+  --popover: oklch(0.259 0.013 76);
+  --popover-foreground: oklch(0.945 0.011 92); /* 13.33:1 on popover */
+
+  /* Inverts to light ink, exactly as the light theme inverts to dark: the
+     principal button stays the one with the MOST contrast, not the most
+     colour. */
+  --primary: oklch(0.918 0.013 92);
+  --primary-foreground: oklch(0.218 0.014 72); /* 13.71:1 on primary */
+  --secondary: oklch(0.302 0.014 76);
+  --secondary-foreground: oklch(0.94 0.011 92); /* 11.44:1 on secondary */
+  --muted: oklch(0.302 0.014 76);
+  --muted-foreground: oklch(
+    0.735 0.018 84
+  ); /* 5.83:1 on muted, 7.70:1 on
+                                                background, 6.91:1 on card */
+  --accent: oklch(0.308 0.035 162);
+  --accent-foreground: oklch(0.925 0.045 160); /* 10.68:1 on accent */
+  --destructive: oklch(0.7 0.17 25); /* 6.26:1 on background, 5.62:1 on card */
+  --destructive-foreground: oklch(0.198 0.03 28); /* 6.36:1 on destructive */
+
+  /* Solid, not `oklch(1 0 0 / 10%)` as the template had it. A translucent
+     border over surfaces of three different lightnesses (background, card,
+     popover) renders three different contrasts, and not one of them can be
+     measured without knowing what is behind it. */
+  --border: oklch(0.348 0.014 78); /* 1.57:1 on background */
+  --input: oklch(0.532 0.019 78); /* 3.43:1 on background, 3.08:1 on card */
+  --ring: oklch(0.735 0.115 160); /* 8.02:1 on background, 7.19:1 on card */
+
+  /* The same cloth, lifted: at L 0.462 on charcoal the green goes to mud and
+     disappears into the ground. */
+  --brand: oklch(0.755 0.115 160); /* 8.65:1 on background */
+  --brand-foreground: oklch(0.198 0.03 160); /* 8.66:1 on brand */
+  --brand-subtle: oklch(0.318 0.048 160);
+  --brand-subtle-foreground: oklch(
+    0.828 0.105 160
+  ); /* 11.04:1 on background,
+                                                        7.66:1 on brand-subtle */
+  --brand-border: oklch(0.545 0.09 160); /* 3.80:1 on background */
+
+  --sidebar: oklch(0.226 0.012 76);
+  --sidebar-foreground: oklch(0.932 0.011 92); /* 13.98:1 on sidebar */
+  /* The template shipped `oklch(0.488 0.243 264.376)` here — a violet, the one
+     saturated colour in the whole file and a member of no family in it. */
+  --sidebar-primary: oklch(0.755 0.115 160); /* 8.23:1 on sidebar */
+  --sidebar-primary-foreground: oklch(0.198 0.03 160); /* 8.66:1 */
+  --sidebar-accent: oklch(0.302 0.035 162);
+  --sidebar-accent-foreground: oklch(0.918 0.045 160); /* 10.65:1 */
+  --sidebar-border: oklch(0.332 0.014 78); /* 1.41:1 on sidebar, decorative */
+  --sidebar-ring: oklch(0.735 0.115 160); /* 7.62:1 on sidebar */
+
+  --shelved: oklch(0.302 0.048 160);
+  --shelved-foreground: oklch(
+    0.822 0.108 160
+  ); /* 7.99:1 on shelved,
+                                                   10.89:1 on background */
+  --on-loan: oklch(0.318 0.045 82);
+  --on-loan-foreground: oklch(
+    0.845 0.105 86
+  ); /* 7.97:1 on on-loan,
+                                                  11.20:1 on background */
+  --overdue: oklch(0.312 0.062 28);
+  --overdue-foreground: oklch(
+    0.795 0.115 30
+  ); /* 6.72:1 on overdue,
+                                                  9.03:1 on background */
+
+  /* The dark theme gets its OWN scale, not the light one reused: the light
+     `chart-1` at L 0.462 would vanish against charcoal, and the light
+     `chart-5` only ever worked as an area fill under a line. */
+  --chart-1: oklch(0.755 0.115 160); /* 8.65:1 on background */
+  --chart-2: oklch(0.82 0.115 84); /* 10.25:1 */
+  --chart-3: oklch(0.712 0.105 268); /* 7.00:1 */
+  --chart-4: oklch(0.7 0.145 25); /* 6.35:1 */
+  --chart-5: oklch(0.628 0.025 84); /* 5.12:1 */
+
+  /* In the dark the veil needs far more alpha: it is not brightening a light
+     ground, it is putting out the TEXT of a dark page. */
+  --veil: oklch(0.09 0.018 76 / 0.6);
+  --elevation: oklch(0.08 0.018 76 / 0.62);
+  --rule: oklch(0.945 0.011 92 / 0.06);
+  --rule-margin: oklch(0.755 0.115 160 / 0.18);
+}
+
+/*
+ * THE RULED REGISTER. The horizontal lines of an accession ledger plus the one
+ * vertical rule that fences off its margin column. Pure gradients: no image, no
+ * SVG, no request, and it changes theme by itself because both colours are
+ * tokens.
+ *
+ * The line pitch is `--rule-pitch` so a page that stacks the pattern behind
+ * real rows can set it to the row height and have the two line up.
+ */
+@utility ledger {
+  --rule-pitch: 2rem;
+  --rule-margin-x: 4.5rem;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0 calc(var(--rule-pitch) - 1px),
+      var(--rule) calc(var(--rule-pitch) - 1px) var(--rule-pitch)
+    ),
+    linear-gradient(
+      to right,
+      transparent 0 var(--rule-margin-x),
+      var(--rule-margin) var(--rule-margin-x) calc(var(--rule-margin-x) + 1px),
+      transparent calc(var(--rule-margin-x) + 1px)
+    );
+}
+
+/* Ruling that runs into the edge of the viewport reads as a rendering fault,
+   not as a texture. It has to die before it gets there. */
+@utility ledger-fade {
+  --ledger-mask: linear-gradient(
+    to bottom,
+    oklch(0 0 0) 0%,
+    oklch(0 0 0) 55%,
+    transparent 100%
+  );
+  -webkit-mask-image: var(--ledger-mask);
+  mask-image: var(--ledger-mask);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
+  }
+
   html {
     @apply font-sans;
+    /* The header is sticky. Without this, an in-page anchor parks its target
+       UNDERNEATH it and the reader jumps to a heading they cannot see. */
+    scroll-padding-top: var(--header-offset);
+  }
+
+  /* Smooth scrolling is a comfort, not a requirement: for someone who asked
+     the operating system for less motion, the instant jump is the correct
+     behaviour. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
     }
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Headings in the reading face; the interface stays in the sans. */
+  h1,
+  h2,
+  h3 {
+    @apply font-heading;
+  }
+
+  /* `balance` on a heading spreads the words across the lines instead of
+     leaving one stranded; `pretty` on running text only kills the orphan,
+     which is all a long paragraph can afford to pay for. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+
+  p,
+  li,
+  blockquote,
+  figcaption {
+    text-wrap: pretty;
+  }
+
+  /*
+   * TABULAR FIGURES IN EVERY TABLE. Proportional digits give `1` a narrower
+   * advance than `8`, so a column of due dates or copy counts comes out ragged
+   * and the eye can no longer compare two rows by their shape. This is the one
+   * typographic setting a bookkeeping system cannot be without, and setting it
+   * on the element means no page has to remember it.
+   */
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Now that `--font-mono` exists in the theme, the code elements inherit the
+     right face without a `className="font-mono"` on each of them. */
+  code,
+  kbd,
+  samp,
+  pre {
+    @apply font-mono;
+  }
+
+  /* Selection in the brand colour. Measured: 6.53:1 in light, 8.66:1 in dark —
+     selected text stays readable, which is where most sites with a coloured
+     `::selection` fall over. */
+  ::selection {
+    background-color: var(--brand);
+    color: var(--brand-foreground);
+  }
+
+  /* A safety net for what is NOT a shadcn component: a bare link, a `summary`,
+     anything with a `tabindex`. The components zero this with `outline-none`
+     in the utilities layer, which beats the base layer, and draw their own
+     ring — so this rule does not double theirs. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
 }

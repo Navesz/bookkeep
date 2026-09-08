@@ -30,6 +30,29 @@ let handle: DatabaseSync | null = null
 export const DATABASE_PATH =
   process.env.BOOKKEEP_DATABASE ?? join(process.cwd(), "bookkeep.db")
 
+/**
+ * Where `schema.sql` lives — and why this is not just `import.meta.dirname`.
+ *
+ * Under plain `node lib/db/seed.ts` it is exactly that, and nothing about the
+ * tests or the CLI changes. Under a BUNDLER it is not: Next 16.2.6 with
+ * Turbopack keeps `import.meta.url` correct (measured: it is the `file://` URL
+ * of the original source file) but leaves `import.meta.dirname` UNDEFINED, and
+ * `join(undefined, "schema.sql")` throws `ERR_INVALID_ARG_TYPE` on the first
+ * database call — which is to say on the first request the web app ever serves.
+ *
+ * `fileURLToPath(import.meta.url)` is the usual repair and it is not safe here:
+ * the URL Turbopack supplies on Windows is `file://C:\…\file.ts`, with
+ * backslashes and only two slashes, which `fileURLToPath` rejects.
+ *
+ * So the fallback is `process.cwd()`, which is what `DATABASE_PATH` two lines
+ * above already assumes — the project root. One assumption, stated twice in the
+ * same file, rather than two different ones.
+ */
+const SCHEMA_PATH =
+  import.meta.dirname !== undefined
+    ? join(import.meta.dirname, "schema.sql")
+    : join(process.cwd(), "lib", "db", "schema.sql")
+
 export function database(path: string = DATABASE_PATH): DatabaseSync {
   if (handle) return handle
 
@@ -51,7 +74,7 @@ export function database(path: string = DATABASE_PATH): DatabaseSync {
   // Applied on every boot, not once: schema.sql is idempotent, and a database
   // that repairs its own shape at startup cannot drift from the file that
   // describes it.
-  db.exec(readFileSync(join(import.meta.dirname, "schema.sql"), "utf8"))
+  db.exec(readFileSync(SCHEMA_PATH, "utf8"))
 
   handle = db
   return db
