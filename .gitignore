@@ -34,3 +34,13 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# the database is data, not source
+# It is born in the project root the moment anyone runs the app, and it holds
+# member names and e-mail addresses. This repository is public: a committed
+# .db is a personal-data leak that survives in the history even after the file
+# is deleted. The project it replaces committed its .env.local for the same
+# reason — nobody meant to.
+*.db
+*.db-shm
+*.db-wal
