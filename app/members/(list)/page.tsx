@@ -124,7 +124,7 @@ export default async function MembersPage() {
                   <li key={person.id}>
                     <Link
                       href={`/members/${person.id}`}
-                      className="flex min-h-16 flex-col gap-1 rounded-xl px-4 py-3 outline-none transition-colors first:rounded-b-none last:rounded-t-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+                      className="flex min-h-16 flex-col gap-1 rounded-xl px-4 py-3 transition-colors outline-none first:rounded-b-none last:rounded-t-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
                     >
                       <span className="min-w-0 space-y-0.5">
                         <span className="block font-medium text-foreground">

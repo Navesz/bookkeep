@@ -199,11 +199,18 @@ export function LendCopyForm({
             ))}
           </NativeSelect>
           {memberIssue ? (
-            <FieldError id="lend-member-error">{memberIssue.message}</FieldError>
+            <FieldError id="lend-member-error">
+              {memberIssue.message}
+            </FieldError>
           ) : null}
         </Field>
 
-        <Button type="submit" size="lg" aria-disabled={pending} className="h-11">
+        <Button
+          type="submit"
+          size="lg"
+          aria-disabled={pending}
+          className="h-11"
+        >
           {pending ? (
             <LoaderCircle aria-hidden className="animate-spin" />
           ) : (

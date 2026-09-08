@@ -139,7 +139,13 @@ export default function RootLayout({
             <div className="mx-auto flex h-(--header-offset) max-w-6xl items-center gap-3 px-4">
               <Link
                 href="/"
-                className="flex items-center gap-2.5 rounded-md focus-visible:outline-none"
+                // `outline-none` ALONE is a keyboard trap dressed as a style
+                // choice: it removes the browser's focus ring and puts nothing
+                // back, so the first stop of every Tab on every page is
+                // invisible. The outline goes INWARD (`-outline-offset`)
+                // because the header is a sticky bar with `overflow` above it,
+                // and a ring drawn outside gets clipped at the top edge.
+                className="flex items-center gap-2.5 rounded-md focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
               >
                 <Mark className="size-7" />
                 {/* The wordmark is lower case because the product is called

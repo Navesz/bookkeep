@@ -79,11 +79,7 @@ export function DeskConsole({
   mode: DeskMode
   members: MemberOption[]
 }) {
-  return mode === "return" ? (
-    <ReturnDesk />
-  ) : (
-    <LendDesk members={members} />
-  )
+  return mode === "return" ? <ReturnDesk /> : <LendDesk members={members} />
 }
 
 // ── lending ───────────────────────────────────────────────────────────────
@@ -147,11 +143,7 @@ function LendDesk({ members }: { members: MemberOption[] }) {
         </div>
       </form>
 
-      <Outcome
-        state={state}
-        describe={describeLend(members)}
-        verb="Lent"
-      />
+      <Outcome state={state} describe={describeLend(members)} verb="Lent" />
       <RunningLog entries={log} />
     </div>
   )
@@ -328,7 +320,7 @@ function Outcome<T>({
             <CircleAlert aria-hidden className="mt-0.5 size-5 shrink-0" />
           )}
           <div className="min-w-0 space-y-1">
-            <p className="text-h4 font-sans">
+            <p className="font-sans text-h4">
               {ok ? verb : "Not done"}
               {/* The barcode is repeated in the message rather than left in
                   the field, which is what makes clearing the field safe. */}

@@ -92,7 +92,7 @@ export default async function DeskPage({
                     className={cn(
                       // 44px tall, and wide: this is switched with a thumb,
                       // often without looking.
-                      "flex min-h-11 items-center gap-2 rounded-lg px-5 text-row font-medium outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
+                      "flex min-h-11 items-center gap-2 rounded-lg px-5 text-row font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                       current
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"

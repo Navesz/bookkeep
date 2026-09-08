@@ -79,9 +79,9 @@ export default async function OverduePage() {
               </EmptyMedia>
               <EmptyTitle>Nothing is late</EmptyTitle>
               <EmptyDescription>
-                Every copy that is out is still inside its {LOAN_DAYS}-day
-                loan period. This screen fills itself as due dates pass; there
-                is nothing to do here until it does.
+                Every copy that is out is still inside its {LOAN_DAYS}-day loan
+                period. This screen fills itself as due dates pass; there is
+                nothing to do here until it does.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
@@ -100,7 +100,7 @@ export default async function OverduePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead scope="col" className="pl-0">
+                  <TableHead scope="col" className="pl-1">
                     Book
                   </TableHead>
                   <TableHead scope="col" className="hidden lg:table-cell">
@@ -110,7 +110,7 @@ export default async function OverduePage() {
                     With
                   </TableHead>
                   <TableHead scope="col">Late by</TableHead>
-                  <TableHead scope="col" className="pr-0 text-right">
+                  <TableHead scope="col" className="pr-1 text-right">
                     <span className="sr-only">Action</span>
                   </TableHead>
                 </TableRow>
@@ -121,15 +121,15 @@ export default async function OverduePage() {
                   <TableRow key={loan.id}>
                     <TableHead
                       scope="row"
-                      className="py-3 pl-0 align-top font-normal whitespace-normal"
+                      className="py-3 pl-1 align-top font-normal whitespace-normal"
                     >
-                      {/* Links into the search rather than to `/books/<id>`:
-                          `OverdueLoan` carries `copy_id` but not `book_id`, and
-                          a link built from the wrong key would resolve to the
-                          wrong book. The same note is on the member page. */}
+                      {/* Straight to the book: `OverdueLoan` now carries
+                          `book_id`. It linked into the search while the query
+                          selected the title but not the key, because a link
+                          built from `copy_id` resolves to the wrong book. */}
                       <Link
-                        href={`/?q=${encodeURIComponent(loan.title)}`}
-                        className="rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:underline"
+                        href={`/books/${loan.book_id}`}
+                        className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline"
                       >
                         {loan.title}
                       </Link>
@@ -156,7 +156,7 @@ export default async function OverduePage() {
                     <TableCell className="hidden py-3 align-top text-row sm:table-cell">
                       <Link
                         href={`/members/${loan.member_id}`}
-                        className="rounded-sm underline-offset-4 outline-none hover:underline focus-visible:underline"
+                        className="rounded-sm underline-offset-4 hover:underline"
                       >
                         {loan.member_name}
                       </Link>
@@ -184,7 +184,7 @@ export default async function OverduePage() {
                       </span>
                     </TableCell>
 
-                    <TableCell className="py-3 pr-0 text-right align-top">
+                    <TableCell className="py-3 pr-1 text-right align-top">
                       <ReturnCopyButton
                         loanId={loan.id}
                         barcode={loan.barcode}

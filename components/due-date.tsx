@@ -45,7 +45,7 @@ export function DueDate({
     <span className={cn("flex flex-col gap-0.5", className)}>
       <time
         dateTime={machineDay(due)}
-        className="text-row tabular-nums text-foreground"
+        className="text-row text-foreground tabular-nums"
       >
         {formatDay(due)}
       </time>

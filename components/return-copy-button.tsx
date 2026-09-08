@@ -54,8 +54,9 @@ export function ReturnCopyButton({
         aria-disabled={pending}
         // 44px tall even though the visual button is a `sm`: a table of six
         // copies is six targets in a column, and this is the one that is
-        // pressed a hundred times a day.
-        className="h-11 px-3"
+        // pressed a hundred times a day. The horizontal padding tightens on a
+        // phone, where the row has 375px to hold a barcode, a status and this.
+        className="h-11 px-2.5 sm:px-3"
       >
         {pending ? (
           <LoaderCircle aria-hidden className="animate-spin" />

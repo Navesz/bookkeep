@@ -89,11 +89,31 @@ export function PageFrame({
           container, which is what makes the active tab's 2px mark read as a
           tab and not as an underline. */}
       <nav aria-label="Sections" className="-mt-2 border-b border-border">
-        {/* `overflow-x-auto` is the safety net for 320px, and `pb-px` gives the
-            focus ring somewhere to be: a ring is drawn 3px outside its element,
-            and a scroll container clips whatever leaves it. Without the pixel,
-            tabbing to a tab would show a ring with its bottom edge sliced off. */}
-        <ul className="-mb-px flex items-stretch gap-0.5 overflow-x-auto pb-px">
+        {/* ═══════════════════════════════════════════════════════════════
+            IT WRAPS. IT DOES NOT SCROLL — AND THAT IS ABOUT FOCUS RINGS.
+
+            This was `overflow-x-auto` with a pixel of padding, as a safety net
+            for 320px. Measuring the focus ring against its clipping ancestor
+            showed the net was the problem: room above the first tab 0px, below
+            it 1px, to its left 0px, against a ring that is drawn 3px outside
+            the element. A keyboard landing on any tab would have shown a ring
+            with three sides sliced off.
+
+            Padding the scroll container is the usual repair and it fights the
+            other requirement here: the active tab's 2px underline has to land
+            exactly ON the rule below the strip, which is what `-mb-px` buys and
+            what any bottom padding would undo.
+
+            So the overflow is simply gone. The four labels measure about 300px
+            without their icons — they fit at 375px with room to spare, verified
+            in the browser — and below that they wrap to a second line instead
+            of scrolling. Wrapping is also the better failure: a scrolling strip
+            hides the LAST tab, which is Overdue, which is the one that matters
+            at opening time. The cost is that on a wrapped first row the active
+            tab's underline sits mid-block rather than on the rule; that happens
+            under 343px and is worth a focus ring that is never cut.
+            ═══════════════════════════════════════════════════════════════ */}
+        <ul className="-mb-px flex flex-wrap items-stretch gap-0.5">
           {SECTIONS.map(({ key, href, label, icon: Icon }) => {
             const current = key === section
 
@@ -108,13 +128,16 @@ export function PageFrame({
                   aria-current={current ? "page" : undefined}
                   className={cn(
                     // `min-h-11` is the 44px touch target this app is built to.
-                    "flex min-h-11 items-center gap-1.5 rounded-t-lg border-b-2 px-3 text-sm whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/50",
+                    "flex min-h-11 items-center gap-1.5 rounded-t-lg border-b-2 px-3 text-sm whitespace-nowrap transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                     current
                       ? "border-brand font-medium text-foreground"
                       : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                   )}
                 >
-                  <Icon aria-hidden className="hidden size-4 shrink-0 sm:block" />
+                  <Icon
+                    aria-hidden
+                    className="hidden size-4 shrink-0 sm:block"
+                  />
                   {label}
                   {key === "overdue" && late > 0 ? (
                     <span className="ml-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-4xl bg-overdue px-1.5 text-xs font-medium text-overdue-foreground tabular-nums">

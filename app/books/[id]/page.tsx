@@ -170,7 +170,10 @@ export default async function BookPage({
               )}
             </Entry>
             <Entry label="Added">
-              <time dateTime={machineDay(book.added_at)} className="tabular-nums">
+              <time
+                dateTime={machineDay(book.added_at)}
+                className="tabular-nums"
+              >
                 {formatDay(book.added_at)}
               </time>
             </Entry>

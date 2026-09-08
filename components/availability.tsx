@@ -73,7 +73,10 @@ export function Availability({
               layer sets this on `table`; a list is not a table, so it is set
               here. */}
           <span
-            className={cn("tabular-nums", allOut ? "font-normal" : "font-medium")}
+            className={cn(
+              "tabular-nums",
+              allOut ? "font-normal" : "font-medium"
+            )}
           >
             {available} of {copies}
           </span>

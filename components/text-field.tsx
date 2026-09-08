@@ -3,7 +3,12 @@ import type { ComponentProps, ReactNode } from "react"
 import { cn } from "@/lib/utils"
 import type { Issue } from "@/lib/validation.ts"
 import { Input } from "@/components/ui/input"
-import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field"
 
 /**
  * ONE TEXT FIELD, WIRED CORRECTLY, IN ONE PLACE.

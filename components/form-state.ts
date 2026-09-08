@@ -30,10 +30,10 @@ export function useFormAction<T>(
     form: FormData
   ) => Promise<Submission<T>>
 ) {
-  const [state, submit, pending] = useActionState<Submission<T> | null, FormData>(
-    action,
-    null
-  )
+  const [state, submit, pending] = useActionState<
+    Submission<T> | null,
+    FormData
+  >(action, null)
 
   return { state, submit, pending }
 }

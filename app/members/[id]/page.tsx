@@ -89,9 +89,7 @@ export default async function MemberPage({
         <PageHeader
           eyebrow="Member"
           title={person.name}
-          description={
-            <span className="break-all">{person.email}</span>
-          }
+          description={<span className="break-all">{person.email}</span>}
         />
 
         <dl className="grid grid-cols-2 gap-x-8 gap-y-4 rounded-xl border border-border p-4 sm:grid-cols-3">
@@ -141,14 +139,14 @@ export default async function MemberPage({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead scope="col" className="pl-0">
+                  <TableHead scope="col" className="pl-1">
                     Book
                   </TableHead>
                   <TableHead scope="col" className="hidden sm:table-cell">
                     Copy
                   </TableHead>
                   <TableHead scope="col">Due back</TableHead>
-                  <TableHead scope="col" className="pr-0 text-right">
+                  <TableHead scope="col" className="pr-1 text-right">
                     <span className="sr-only">Action</span>
                   </TableHead>
                 </TableRow>
@@ -159,25 +157,17 @@ export default async function MemberPage({
                     {/* `scope="row"` — the title is what names this line. */}
                     <TableHead
                       scope="row"
-                      className="py-3 pl-0 align-top font-normal whitespace-normal"
+                      className="py-3 pl-1 align-top font-normal whitespace-normal"
                     >
-                      {/* THE TITLE LINKS INTO THE SEARCH, NOT TO `/books/<id>`,
-                          and that is a limitation being handled honestly rather
-                          than a preference. `LoanRecord` in `lib/db/loans.ts`
-                          carries `copy_id` but no `book_id` — the JOIN reaches
-                          `book` for the title and author and does not select
-                          its key — so the book's own id is not on this page to
-                          link to. Guessing `/books/${copy_id}` would produce a
-                          URL that resolves, to the WRONG book, which is worse
-                          than no link at all.
-                          `/?q=<title>` lands on the catalogue with this title
-                          matched, which is one click further and never wrong.
-                          Adding `b.id AS book_id` to that query would make this
-                          a direct link; it is one column in a file this agent
-                          does not own. */}
+                      {/* The title goes straight to the book. It used to go to
+                          `/?q=<title>` because `LoanRecord` selected the title
+                          from `book` without selecting its key, and a link
+                          built from `copy_id` would have resolved — to the
+                          WRONG book, which is worse than no link. The query now
+                          carries `b.id AS book_id`, so the guess is gone. */}
                       <Link
-                        href={`/?q=${encodeURIComponent(loan.title)}`}
-                        className="rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:underline"
+                        href={`/books/${loan.book_id}`}
+                        className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline"
                       >
                         {loan.title}
                       </Link>
@@ -199,7 +189,7 @@ export default async function MemberPage({
                     <TableCell className="py-3 align-top">
                       <DueDate due={loan.due_at} now={now} />
                     </TableCell>
-                    <TableCell className="py-3 pr-0 text-right align-top">
+                    <TableCell className="py-3 pr-1 text-right align-top">
                       <ReturnCopyButton
                         loanId={loan.id}
                         barcode={loan.barcode}
@@ -234,7 +224,7 @@ export default async function MemberPage({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead scope="col" className="pl-0">
+                  <TableHead scope="col" className="pl-1">
                     Book
                   </TableHead>
                   <TableHead scope="col" className="hidden md:table-cell">
@@ -243,7 +233,10 @@ export default async function MemberPage({
                   <TableHead scope="col" className="hidden sm:table-cell">
                     Taken out
                   </TableHead>
-                  <TableHead scope="col" className="pr-0 text-right sm:text-left">
+                  <TableHead
+                    scope="col"
+                    className="pr-1 text-right sm:text-left"
+                  >
                     Returned
                   </TableHead>
                 </TableRow>
@@ -253,9 +246,11 @@ export default async function MemberPage({
                   <TableRow key={loan.id}>
                     <TableHead
                       scope="row"
-                      className="py-3 pl-0 align-top font-normal whitespace-normal"
+                      className="py-3 pl-1 align-top font-normal whitespace-normal"
                     >
-                      <span className="block text-foreground">{loan.title}</span>
+                      <span className="block text-foreground">
+                        {loan.title}
+                      </span>
                       <span className="block text-caption text-muted-foreground">
                         {loan.author}
                       </span>
@@ -271,7 +266,7 @@ export default async function MemberPage({
                         {formatDay(loan.lent_at)}
                       </time>
                     </TableCell>
-                    <TableCell className="py-3 pr-0 text-right align-top text-row tabular-nums sm:text-left">
+                    <TableCell className="py-3 pr-1 text-right align-top text-row tabular-nums sm:text-left">
                       {/* `returned_at` is non-null for every row in this list —
                           that is what put it here — but TypeScript cannot know
                           that from a `filter`, so the fallback is written out

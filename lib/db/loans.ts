@@ -201,7 +201,9 @@ export function lendByBarcode(
     // A LOOKUP ON THE FAILURE PATH IS NOT CHECK-THEN-ACT. The write has already
     // been refused and nothing is decided by what comes back; this runs so the
     // error can carry the copy id as well as the barcode the caller had.
-    const copy = db.prepare("SELECT id FROM copy WHERE barcode = ?").get(barcode)
+    const copy = db
+      .prepare("SELECT id FROM copy WHERE barcode = ?")
+      .get(barcode)
     // The index cannot fire for a copy that does not exist, so this branch is
     // unreachable — and if it is ever reached, re-raising the original error is
     // more honest than inventing an id to put in a nicer one.
@@ -329,6 +331,13 @@ export type OpenLoan = {
   member_id: number
   member_name: string
   barcode: string
+  /**
+   * The book this copy belongs to, so a title can link to its record rather
+   * than to a catalogue search for its own name. Without it the only honest
+   * link was `/?q=<title>`, which is a guess dressed as navigation: two
+   * books sharing a title land the reader on a list and ask them to pick.
+   */
+  book_id: number
   title: string
   author: string
   lent_at: string
@@ -347,7 +356,7 @@ export type OverdueLoan = OpenLoan & {
 
 const OPEN_LOAN_QUERY = `
   SELECT l.id, l.copy_id, l.member_id, m.name AS member_name,
-         c.barcode, b.title, b.author, l.lent_at, l.due_at
+         c.barcode, b.id AS book_id, b.title, b.author, l.lent_at, l.due_at
   FROM loan l
   JOIN copy c ON c.id = l.copy_id
   JOIN book b ON b.id = c.book_id
@@ -387,7 +396,7 @@ export function overdueLoans(): OverdueLoan[] {
   return database()
     .prepare(
       `SELECT l.id, l.copy_id, l.member_id, m.name AS member_name,
-              c.barcode, b.title, b.author, l.lent_at, l.due_at,
+              c.barcode, b.id AS book_id, b.title, b.author, l.lent_at, l.due_at,
               CAST(julianday('now') - julianday(l.due_at) AS INTEGER)
                 AS days_overdue
        FROM loan l
@@ -405,6 +414,13 @@ export type LoanRecord = {
   id: number
   copy_id: number
   barcode: string
+  /**
+   * The book this copy belongs to, so a title can link to its record rather
+   * than to a catalogue search for its own name. Without it the only honest
+   * link was `/?q=<title>`, which is a guess dressed as navigation: two
+   * books sharing a title land the reader on a list and ask them to pick.
+   */
+  book_id: number
   title: string
   author: string
   lent_at: string
@@ -437,7 +453,7 @@ export type LoanRecord = {
 export function loanHistoryOf(memberId: number): LoanRecord[] {
   return database()
     .prepare(
-      `SELECT l.id, l.copy_id, c.barcode, b.title, b.author,
+      `SELECT l.id, l.copy_id, c.barcode, b.id AS book_id, b.title, b.author,
               l.lent_at, l.due_at, l.returned_at,
               (l.returned_at IS NULL AND l.due_at < datetime('now'))
                 AS overdue

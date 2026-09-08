@@ -1,6 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState, useTransition, type ReactNode } from "react"
+import {
+  useEffect,
+  useRef,
+  useState,
+  useTransition,
+  type ReactNode,
+} from "react"
 import { useRouter } from "next/navigation"
 import { LoaderCircle, Search, X } from "lucide-react"
 
@@ -62,6 +68,29 @@ export function CatalogueSearch({
 }) {
   const router = useRouter()
   const field = useRef<HTMLInputElement>(null)
+
+  /**
+   * THE `defaultValue` IS FROZEN AT THE FIRST RENDER, and that is a real fix.
+   *
+   * `defaultValue={query}` reads correctly and is wrong: `query` changes on
+   * every search, the input is uncontrolled, and React only applies a
+   * `defaultValue` at mount. Base UI notices and says so —
+   *
+   *   Base UI: A component is changing the default value state of an
+   *   uncontrolled FieldControl after being initialized.
+   *
+   * `useState` with no setter is the idiomatic freeze — it captures the first
+   * value and never changes it. A `useRef` does the same thing and reads its
+   * `.current` during render, which `react-hooks/refs` rejects for exactly the
+   * reason that makes it a bad habit: a ref read in render is invisible to
+   * React and will not be re-run when it should be.
+   *
+   * The frozen value is the one the SERVER rendered, which is what has to be in
+   * the HTML for the no-JavaScript case. Keeping the field in step with the URL
+   * after that is the effect below's job, and it does it by writing to the DOM
+   * only when the field does not have focus.
+   */
+  const [initialQuery] = useState(query)
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -74,11 +103,14 @@ export function CatalogueSearch({
   function go(value: string) {
     const trimmed = value.trim()
     startTransition(() => {
-      router.replace(trimmed === "" ? "/" : `/?q=${encodeURIComponent(trimmed)}`, {
-        // The results change; the reading position should not. Without this,
-        // every keystroke would yank a scrolled list back to the top.
-        scroll: false,
-      })
+      router.replace(
+        trimmed === "" ? "/" : `/?q=${encodeURIComponent(trimmed)}`,
+        {
+          // The results change; the reading position should not. Without this,
+          // every keystroke would yank a scrolled list back to the top.
+          scroll: false,
+        }
+      )
     })
   }
 
@@ -178,9 +210,10 @@ export function CatalogueSearch({
             ref={field}
             name="q"
             type="search"
-            // Uncontrolled on purpose — see `hasText` above, and the effect
-            // that syncs it back from the URL when it is not focused.
-            defaultValue={query}
+            // Uncontrolled on purpose — see `hasText` above, the frozen
+            // `initialQuery` and the effect that syncs it back from the URL
+            // when the field is not focused.
+            defaultValue={initialQuery}
             placeholder="Title or author…"
             autoComplete="off"
             // The browser's own history dropdown covers the first three results

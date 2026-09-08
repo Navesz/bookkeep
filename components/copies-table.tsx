@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 import type { OpenLoan } from "@/lib/db/loans.ts"
-import { dueLabel, formatDay } from "@/components/dates"
+import { dueLabel } from "@/components/dates"
 import { CopyStatus } from "@/components/copy-status"
 import { DueDate } from "@/components/due-date"
 import { LinkButton } from "@/components/link-button"
@@ -47,8 +47,21 @@ export type CopyLine = {
  * the status cell at exactly the widths where they are gone. At any one
  * viewport each fact is present once.
  *
- * WHAT IS LEFT AT 375px: barcode (75px), status and its two extra lines, and
- * the action. Measured at 343px of usable width against 323px of content.
+ * WHAT IS LEFT AT 375px: the barcode, the status with its two extra lines, and
+ * the action.
+ *
+ * THAT WAS NOT ENOUGH ON ITS OWN, and the reason is a default worth knowing:
+ * `TableCell` in `components/ui/table.tsx` sets `whitespace-nowrap`. Every one
+ * of those extra lines was therefore unbreakable, the widest —
+ * "1 day overdue · 7 Sept 2026" — pushed the row past 375px, and the table
+ * scrolled sideways inside its own `overflow-x-auto` wrapper. Which is the one
+ * outcome all of the above was arranged to avoid: the Return button, and its
+ * focus ring, half outside the box.
+ *
+ * So the status cell is `whitespace-normal` — it is the only cell here holding
+ * a sentence rather than a token — and the mobile due line drops the date and
+ * keeps the standing. "1 day overdue" is what decides what happens next; the
+ * calendar date is available one breakpoint up and on the loan itself.
  * ═════════════════════════════════════════════════════════════════════════
  */
 export function CopiesTable({
@@ -65,10 +78,18 @@ export function CopiesTable({
     <Table>
       <TableHeader>
         <TableRow>
+          {/* `pl-1`/`pr-1` AND NOT `pl-0`/`pr-0`, WHICH IS ABOUT FOCUS RINGS
+                AGAIN. `Table` in `components/ui/table.tsx` wraps every table in
+                `overflow-x-auto`, and `overflow: auto` clips its content box
+                whether or not it is actually scrolling. A control flush against
+                the first or last column edge therefore loses the 3px of ring
+                drawn outside it — the Return button on every row, and the book
+                title link on the member page. Four pixels of inset is invisible
+                against a 72rem page and is the whole fix. */}
           {/* Every header is a real `<th scope="col">` — that is what lets a
               screen reader say "Status: On loan" when the reader moves onto a
               cell, instead of reading a bare word with no column attached. */}
-          <TableHead scope="col" className="pl-0">
+          <TableHead scope="col" className="pl-1">
             Copy
           </TableHead>
           <TableHead scope="col">Status</TableHead>
@@ -78,7 +99,7 @@ export function CopiesTable({
           <TableHead scope="col" className="hidden md:table-cell">
             Due back
           </TableHead>
-          <TableHead scope="col" className="pr-0 text-right">
+          <TableHead scope="col" className="pr-1 text-right">
             {/* The action column's heading is spoken and not shown: a visible
                 "Action" over a column of identical buttons tells a sighted
                 reader nothing, and an unlabelled column tells a screen reader
@@ -96,12 +117,15 @@ export function CopiesTable({
                 for everything else on the line. */}
             <TableHead
               scope="row"
-              className="py-3 pl-0 align-top font-mono text-mark font-normal"
+              className="py-3 pl-1 align-top font-mono text-mark font-normal"
             >
               {barcode}
             </TableHead>
 
-            <TableCell className="py-3 align-top">
+            {/* `whitespace-normal` overrides the component's `nowrap`: this is
+                the only cell carrying prose, and on a phone it carries three
+                lines of it. */}
+            <TableCell className="py-3 align-top whitespace-normal">
               <div className="flex flex-col items-start gap-1">
                 <CopyStatus due={loan?.due_at ?? null} now={now} />
 
@@ -116,7 +140,7 @@ export function CopiesTable({
                       {loan.member_name}
                     </span>
                     <span className="text-caption text-muted-foreground md:hidden">
-                      {dueLabel(loan.due_at, now)} · {formatDay(loan.due_at)}
+                      {dueLabel(loan.due_at, now)}
                     </span>
                   </>
                 ) : null}
@@ -125,9 +149,16 @@ export function CopiesTable({
 
             <TableCell className="hidden py-3 align-top text-row sm:table-cell">
               {loan ? (
+                // NO `outline-none` ON AN INLINE LINK. It was there, paired
+                // with `focus-visible:underline` — which looks like a focus
+                // style and is not one, because it is identical to the hover
+                // state this link already has. `outline-none` also removes the
+                // `:focus-visible { outline: 2px solid var(--ring) }` that
+                // `app/globals.css` sets as the safety net for everything that
+                // is not a shadcn component. Left alone, that net does the job.
                 <Link
                   href={`/members/${loan.member_id}`}
-                  className="rounded-sm underline-offset-4 outline-none hover:underline focus-visible:underline"
+                  className="rounded-sm underline-offset-4 hover:underline"
                 >
                   {loan.member_name}
                 </Link>
@@ -144,7 +175,7 @@ export function CopiesTable({
               )}
             </TableCell>
 
-            <TableCell className="py-3 pr-0 text-right align-top">
+            <TableCell className="py-3 pr-1 text-right align-top">
               {loan ? (
                 <ReturnCopyButton loanId={loan.id} barcode={barcode} />
               ) : (
@@ -160,7 +191,7 @@ export function CopiesTable({
                   scroll={false}
                   variant="outline"
                   size="sm"
-                  className="h-11 px-3"
+                  className="h-11 px-2.5 sm:px-3"
                 >
                   Lend
                   <span className="sr-only"> copy {barcode}</span>

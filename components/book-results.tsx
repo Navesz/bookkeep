@@ -110,7 +110,7 @@ export function BookResults({
               // The whole row is the target. `min-h-16` keeps it well past the
               // 44px floor even for a one-line title, so a thumb aiming at a
               // list of twenty does not need to aim at all.
-              className="flex min-h-16 flex-col gap-1 rounded-xl px-4 py-3 outline-none transition-colors first:rounded-b-none last:rounded-t-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
+              className="flex min-h-16 flex-col gap-1 rounded-xl px-4 py-3 transition-colors outline-none first:rounded-b-none last:rounded-t-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
             >
               <span className="min-w-0 space-y-0.5">
                 {/* `font-medium` and full colour on the title, muted on the
@@ -173,8 +173,8 @@ function NoResults({ query }: { query: string }) {
         </EmptyMedia>
         <EmptyTitle>No book matches “{query}”</EmptyTitle>
         <EmptyDescription>
-          Search runs over titles and authors, and matches part of a word — so
-          a fragment is usually safer than a full title.
+          Search runs over titles and authors, and matches part of a word — so a
+          fragment is usually safer than a full title.
           {couldBeAccents ? (
             <>
               {" "}

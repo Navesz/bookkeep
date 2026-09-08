@@ -82,7 +82,11 @@ export function machineDay(value: string): string {
  */
 export function daysUntil(due: string, now: Date): number {
   const at = parseTimestamp(due)
-  const dueDay = Date.UTC(at.getUTCFullYear(), at.getUTCMonth(), at.getUTCDate())
+  const dueDay = Date.UTC(
+    at.getUTCFullYear(),
+    at.getUTCMonth(),
+    at.getUTCDate()
+  )
   const today = Date.UTC(
     now.getUTCFullYear(),
     now.getUTCMonth(),

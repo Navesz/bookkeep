@@ -28,11 +28,7 @@ import { Skeleton } from "@/components/ui/skeleton"
  * without sight. Grey rectangles announce nothing at all on their own.
  * ═════════════════════════════════════════════════════════════════════════
  */
-export function PageSkeleton({
-  children,
-}: {
-  children?: React.ReactNode
-}) {
+export function PageSkeleton({ children }: { children?: React.ReactNode }) {
   return (
     <div aria-busy="true" className="space-y-8">
       <span className="sr-only" role="status">
@@ -69,7 +65,16 @@ export function PageSkeleton({
  * client's first render, which is a hydration mismatch for a decoration.
  */
 export function RowsSkeleton({ rows = 8 }: { rows?: number }) {
-  const widths = ["w-64", "w-48", "w-72", "w-56", "w-40", "w-68", "w-52", "w-60"]
+  const widths = [
+    "w-64",
+    "w-48",
+    "w-72",
+    "w-56",
+    "w-40",
+    "w-68",
+    "w-52",
+    "w-60",
+  ]
 
   return (
     <div className="divide-y divide-border rounded-xl border border-border">
