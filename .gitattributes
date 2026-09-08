@@ -1,0 +1,25 @@
+# Line endings are LF in the repository, always.
+#
+# Without this, every `git add` on Windows warns "LF will be replaced by CRLF",
+# and the Windows + Linux CI matrix starts comparing files that differ only in
+# line endings. The matrix exists to catch real portability defects; CRLF noise
+# inside it teaches people to ignore the matrix.
+*         text=auto eol=lf
+
+# Git runs these two through /bin/sh. A CRLF after the shebang makes the
+# interpreter unfindable — on Git for Windows the hook dies with a message that
+# does not say why.
+.githooks/pre-commit  text eol=lf
+.githooks/commit-msg  text eol=lf
+
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.ico     binary
+*.webp    binary
+*.avif    binary
+*.woff2   binary
+
+# The database is a build product, never a source file. Marked binary so a
+# stray commit of one cannot be "merged".
+*.db      binary

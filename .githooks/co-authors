@@ -1,0 +1,26 @@
+# HUMAN co-authors accepted in this repository. An ALLOWLIST, not a blocklist.
+#
+# WHY IT IS INVERTED. The natural way to write this rule is to enumerate the AI
+# assistants whose trailers should be refused. That list is stale the week after
+# it is written — a new assistant ships, writes a `Co-authored-by` trailer git
+# recognises like any other, and the rule passes it without a word. The humans
+# working on a project are a short list that changes about once a year.
+#
+# So the rule is: a co-authorship trailer passes if, and only if, its address is
+# on this list. An AI does not sign commits here. If you want the trailer never
+# to be generated in the first place — which is the real fix, because then there
+# is no false positive to argue about — in Claude Code that is
+#   .claude/settings.json  ->  { "includeCoAuthoredBy": false }
+#
+# FORMAT: one identity per line, either "Name <address>" or a bare address. What
+# is compared is the ADDRESS, lower-cased; the display name is free text and
+# identifies nobody. Blank lines and lines starting with # are ignored.
+#
+# READ BY: .githooks/check-message.mjs, from the commit-msg hook, before the
+# commit exists.
+#
+# KEEP THIS FILE TRACKED. If it is missing, the hook fails closed and refuses
+# every co-authorship trailer — deleting a file must never be the easy way to
+# switch a rule off.
+
+Naves <58537948+Navesz@users.noreply.github.com>

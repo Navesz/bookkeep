@@ -1,0 +1,31 @@
+#!/bin/sh
+# Runs before the commit exists — ONLY WHAT IS FAST.
+#
+# A slow hook is a disabled hook, and a disabled hook checks nothing. The budget
+# here is a couple of seconds. No typecheck, no tests, no build: that is the
+# gate's work (`npm run verify`), and the gate runs in CI where nobody is
+# waiting in front of it.
+#
+# Measured, with every file in the project staged at once (68 files): 0.61 s,
+# 0.63 s, 0.65 s across three runs. The cost is three git processes regardless
+# of how many files the commit touches.
+#
+# What lives here is the one thing that has to be refused BEFORE it exists,
+# because afterwards is too late: a secret in the history means ROTATING the
+# credential, and the next commit does not undo that.
+#
+# The other half — a co-authorship trailer that is not a human on the allowlist
+# — is refused by the commit-msg hook, which runs with the message in hand.
+#
+# Install with:  npm run hooks
+# Skip once:     git commit --no-verify
+set -e
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT"
+
+# Only what is staged, and read from the INDEX rather than from disk: that is
+# what this commit is about to add, and it is what fits the time budget.
+node .githooks/scan-secrets.mjs --staged
+
+exit 0

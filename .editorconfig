@@ -1,0 +1,17 @@
+# One answer for indentation, charset and line endings, read by the editor
+# before anyone opens a pull request. The gate does not check formatting, so
+# this is the cheapest place to stop a diff that is 90% whitespace.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown uses two trailing spaces as a hard line break. Trimming them would
+# silently change the rendered text.
+[*.md]
+trim_trailing_whitespace = false

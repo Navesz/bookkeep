@@ -5,3 +5,9 @@ node_modules/
 coverage/
 pnpm-lock.yaml
 .pnpm-store/
+
+# Prose and legal text stay out. Prettier reflows Markdown and the licence, and
+# a thousand-line diff hides the change that actually happened.
+*.md
+LICENSE
+NOTICE

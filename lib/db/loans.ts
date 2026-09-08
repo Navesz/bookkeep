@@ -86,7 +86,7 @@ export function lend(copyId: number, memberId: number, days = LOAN_DAYS): Loan {
   const insert = db.prepare(
     `INSERT INTO loan (copy_id, member_id, due_at)
      VALUES (?, ?, datetime('now', ?))
-     RETURNING id, copy_id, member_id, lent_at, due_at, returned_at`,
+     RETURNING id, copy_id, member_id, lent_at, due_at, returned_at`
   )
 
   try {
@@ -107,7 +107,7 @@ export function returnLoan(loanId: number): Loan {
   const update = db.prepare(
     `UPDATE loan SET returned_at = datetime('now')
      WHERE id = ? AND returned_at IS NULL
-     RETURNING id, copy_id, member_id, lent_at, due_at, returned_at`,
+     RETURNING id, copy_id, member_id, lent_at, due_at, returned_at`
   )
 
   const row = update.get(loanId) as Loan | undefined
@@ -124,7 +124,7 @@ export function copiesOf(bookId: number) {
        LEFT JOIN loan l ON l.copy_id = c.id AND l.returned_at IS NULL
        LEFT JOIN member m ON m.id = l.member_id
        WHERE c.book_id = ?
-       ORDER BY c.barcode`,
+       ORDER BY c.barcode`
     )
     .all(bookId)
 }
@@ -138,7 +138,7 @@ export function openLoansOf(memberId: number) {
        JOIN copy c ON c.id = l.copy_id
        JOIN book b ON b.id = c.book_id
        WHERE l.member_id = ? AND l.returned_at IS NULL
-       ORDER BY l.due_at`,
+       ORDER BY l.due_at`
     )
     .all(memberId)
 }

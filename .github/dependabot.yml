@@ -1,0 +1,26 @@
+# Two ecosystems, each for its own reason.
+#
+# `github-actions`: what rots in CI is the pinned version of an action, and a
+# stale action is the one that disappears without warning when the runner
+# changes.
+#
+# `npm`: the application is a Next app with React, Tailwind and shadcn, and CI
+# installs all of it. The zero-new-dependencies rule in AGENTS.md is about what
+# WE add, not about pretending the framework is not there.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Grouped, so this does not open seven pull requests a week. A dependency
+    # pull request nobody reads teaches people to close dependency pull requests
+    # without reading them.
+    groups:
+      dependencies:
+        patterns: ["*"]

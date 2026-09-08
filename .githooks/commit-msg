@@ -1,0 +1,8 @@
+#!/bin/sh
+# Runs with the path to the message file in $1, before the commit exists.
+#
+# The missing half of pre-commit: that hook looks at what the commit adds in
+# CONTENT, this one looks at what it adds in AUTHORSHIP.
+set -e
+ROOT=$(git rev-parse --show-toplevel)
+exec node "$ROOT/.githooks/check-message.mjs" "$1"

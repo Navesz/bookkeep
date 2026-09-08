@@ -1,0 +1,81 @@
+# The gate. Two steps, and both are the same two you run on your own machine:
+#
+#   npm run verify
+#   npm run secrets
+#
+# Nothing here is a CI-only check. A green run locally has to mean the same
+# thing as a green run here, or people stop believing either one.
+
+name: verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    # A ceiling, because the GitHub default is SIX HOURS. Without it a hang is
+    # not a red X, it is a runner held all morning and a pull request stuck on
+    # "running". A cold `eslint` on this stack is the slow step and it is
+    # nowhere near this number.
+    timeout-minutes: 20
+
+    strategy:
+      # No fail-fast: knowing whether something broke only on Windows, or on
+      # both, is half the diagnosis. Cancelling the other leg hides exactly
+      # that.
+      fail-fast: false
+      matrix:
+        # THE MATRIX IS NOT DECORATION. This project is developed on Windows and
+        # deployed from Linux, and the difference bites in ordinary places:
+        # path separators, `\r\n` in a message file, `import()` of an absolute
+        # `C:\` path, the execute bit on a hook. Every one of those is a defect
+        # that passes on one OS and fails on the other, so the same command has
+        # to pass on both or it has passed on neither.
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # The Node version comes from `.nvmrc` rather than being written here,
+      # because written here it drifts from the machine people actually develop
+      # on — and the npm that ships with each Node version resolves optional
+      # native dependencies differently, which turns into a lockfile the CI
+      # refuses with a list of missing packages that changes on every retry.
+      # One file, read by both sides: `nvm use` locally, `node-version-file`
+      # here.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      # `npm ci`, not `npm install`: the lockfile is the source of truth, and CI
+      # does not get to pick versions.
+      - run: npm ci
+
+      # One command. Its body lives in package.json so that what runs here is
+      # literally what you run before opening a pull request.
+      #
+      # Zero tolerance: exit 0 is the only pass. There is no "known failure"
+      # list and no step allowed to continue on error — a gate with exceptions
+      # is a report, and nobody reads reports.
+      - name: verify
+        run: npm run verify
+
+      # The secret scan, over EVERYTHING Git tracks rather than over one commit.
+      # The pre-commit hook only ever sees what is staged in front of it, and it
+      # can be skipped with `--no-verify`; this step is the backstop that sees
+      # the whole repository, on every push, with nobody able to skip it.
+      - name: secrets
+        run: npm run secrets

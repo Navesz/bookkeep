@@ -40,14 +40,10 @@ after(() => {
 /** A book, one copy of it, and someone to lend it to. */
 function seed(barcode, email) {
   const book = db
-    .prepare(
-      "INSERT INTO book (title, author) VALUES (?, ?) RETURNING id",
-    )
+    .prepare("INSERT INTO book (title, author) VALUES (?, ?) RETURNING id")
     .get("The Mezzanine", "Nicholson Baker")
   const copy = db
-    .prepare(
-      "INSERT INTO copy (book_id, barcode) VALUES (?, ?) RETURNING id",
-    )
+    .prepare("INSERT INTO copy (book_id, barcode) VALUES (?, ?) RETURNING id")
     .get(book.id, barcode)
   const member = db
     .prepare("INSERT INTO member (name, email) VALUES (?, ?) RETURNING id")
@@ -62,7 +58,10 @@ test("a copy goes out, and the loan knows when it is due", () => {
   assert.equal(loan.copy_id, copy)
   assert.equal(loan.returned_at, null)
   // Due after lent, from the same clock — not merely "a date exists".
-  assert.ok(loan.due_at > loan.lent_at, `${loan.due_at} should follow ${loan.lent_at}`)
+  assert.ok(
+    loan.due_at > loan.lent_at,
+    `${loan.due_at} should follow ${loan.lent_at}`
+  )
 })
 
 test("THE RULE: the same copy cannot go out twice", () => {
@@ -75,7 +74,7 @@ test("THE RULE: the same copy cannot go out twice", () => {
   // open loan exists for that copy, whatever the caller tried.
   const abertos = db
     .prepare(
-      "SELECT count(*) n FROM loan WHERE copy_id = ? AND returned_at IS NULL",
+      "SELECT count(*) n FROM loan WHERE copy_id = ? AND returned_at IS NULL"
     )
     .get(copy)
   assert.equal(abertos.n, 1)
@@ -103,7 +102,9 @@ test("returning twice does not overwrite the first return", () => {
 
   assert.throws(() => returnLoan(loan.id), NoSuchLoan)
 
-  const agora = db.prepare("SELECT returned_at FROM loan WHERE id = ?").get(loan.id)
+  const agora = db
+    .prepare("SELECT returned_at FROM loan WHERE id = ?")
+    .get(loan.id)
   assert.equal(agora.returned_at, fechado.returned_at)
 })
 
