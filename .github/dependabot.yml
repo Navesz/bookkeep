@@ -24,3 +24,11 @@ updates:
     groups:
       dependencies:
         patterns: ["*"]
+    # typescript-eslint declares `typescript: >=4.8.4 <6.1.0` as a peer, and
+    # its CLI refuses to start outside that range ("does not support TS 7.0").
+    # Without this rule the grouped pull request goes red every week and gets
+    # closed unread, which is exactly what the grouping above exists to avoid.
+    # Remove it when typescript-eslint widens the peer range.
+    ignore:
+      - dependency-name: "typescript"
+        versions: [">=6.1.0"]
